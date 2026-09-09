@@ -26,4 +26,15 @@ export interface IFBWasherCardConfig {
   tub_temp_sensor?: string;
   motor_speed_sensor?: string;
   door_locked_sensor?: string;
+  extra_rinse_select?: string;
+  dry_mode_select?: string;
+  prewash_switch?: string;
+  soak_switch?: string;
+  rinse_hold_switch?: string;
+  time_saver_switch?: string;
+  hot_rinse_switch?: string;
+  eco_switch?: string;
+  steam_switch?: string;
+  aroma_switch?: string;
+  anti_crease_switch?: string;
 }

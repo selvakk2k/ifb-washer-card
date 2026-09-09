@@ -606,64 +606,217 @@ export const styles = css`
     background: #f59e0b;
   }
 
-  /* ── Compact View ── */
-  .compact-view {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .compact-info {
+  /* ── Compact Card (Material You / Classic aligned with AC card) ── */
+  .compact-card {
+    background: var(--appliance-bg);
+    border: 1px solid var(--appliance-border);
+    border-radius: var(--ha-card-border-radius, 20px);
+    padding: 16px;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    min-width: 0;
+    gap: 16px;
+    cursor: pointer;
   }
-  .compact-title {
-    font-size: 0.95rem;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .compact-card.classic {
+    border-radius: 16px;
   }
-  .compact-state {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--appliance-accent);
-  }
-  .compact-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-  .compact-action-icon {
+  .compact-card.classic .compact-icon-btn {
     width: 38px;
     height: 38px;
-    border-radius: 50%;
+    border-radius: 10px;
     border: 1px solid var(--appliance-border);
-    background: var(--appliance-surface);
-    color: var(--appliance-text);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    outline: none;
+    background: var(--appliance-surface);
+    color: var(--appliance-text);
     transition: all 0.2s ease;
+    flex-shrink: 0;
   }
-  .compact-action-icon:hover:not(.disabled) {
-    background: var(--appliance-surface-hover);
-  }
-  .compact-action-icon.disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-  .compact-action-icon.on {
+  .compact-card.classic .compact-icon-btn.on {
     background: var(--appliance-accent);
     color: var(--appliance-on-accent, #ffffff);
     border-color: var(--appliance-accent);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--appliance-accent) 40%, transparent);
   }
-  .compact-action-icon ha-icon {
-    --mdc-icon-size: 18px;
+  .compact-card.classic .compact-action-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--appliance-border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--appliance-surface);
+    color: var(--appliance-text);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .compact-card.classic .compact-value {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--appliance-text);
+  }
+
+  /* Google Home Compact */
+  .compact-card.google-home {
+    background: var(--appliance-bg);
+    border-radius: 28px;
+    border: none;
+    box-shadow: none;
+    padding: 16px;
+  }
+  .compact-card.google-home .compact-icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(128, 128, 128, 0.15);
+    color: var(--appliance-text-2);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .compact-card.google-home .compact-icon-btn.on {
+    background: var(--appliance-active-bg);
+    color: var(--appliance-accent);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--appliance-accent) 35%, transparent);
+  }
+  .compact-card.google-home .compact-action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(128, 128, 128, 0.15);
+    color: var(--appliance-text);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .compact-card.google-home .compact-value {
+    font-size: 2.5rem;
+    font-weight: 400;
+    color: var(--appliance-text);
+  }
+
+  .compact-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .compact-title {
+    font-size: 1rem;
+    font-weight: 600;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--appliance-text);
+  }
+  .compact-chevron {
+    color: var(--appliance-text-2);
+    opacity: 0.7;
+    --mdc-icon-size: 22px;
+  }
+  .compact-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+  }
+  .compact-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px;
+  }
+  .compact-icon-btn:hover {
+    background: var(--appliance-surface-hover);
+  }
+  .compact-icon-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .compact-action-btn:hover {
+    background: var(--appliance-surface-hover);
+  }
+  .compact-action-btn:disabled,
+  .compact-action-btn.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .compact-subtitle {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--appliance-text-2);
+    text-align: center;
+  }
+
+  /* ── Modifier Chips Row ── */
+  .modifiers-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .modifiers-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--appliance-text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .modifiers-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .modifiers-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  .modifier-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--appliance-border);
+    background: var(--appliance-surface);
+    color: var(--appliance-text);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .modifier-chip:hover:not(.disabled) {
+    background: var(--appliance-surface-hover);
+  }
+  .modifier-chip.on {
+    background: var(--appliance-active-bg);
+    color: var(--appliance-accent);
+    border-color: var(--appliance-active-border);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--appliance-accent) 25%, transparent);
+  }
+  .modifier-chip.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background: transparent;
+  }
+  .modifier-chip ha-icon {
+    --mdc-icon-size: 16px;
   }
 
   /* ──────────────────────────────────────────────────────────

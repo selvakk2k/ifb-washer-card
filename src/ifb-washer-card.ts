@@ -4,12 +4,145 @@ import { HomeAssistant } from 'custom-card-helpers';
 import { IFBWasherCardConfig } from './types';
 import { styles } from './styles';
 
+// Program Capabilities per Official Wash Guide Map (Pages 57-67)
+const PROGRAM_CAPABILITIES: Record<string, {
+  allowedTemps?: string[];
+  allowedSpins?: string[];
+  supportsDry?: boolean;
+  supportsSteam?: boolean;
+  supportsPrewash?: boolean;
+  supportsSoak?: boolean;
+  supportsTimeSaver?: boolean;
+  supportsExtraRinse?: boolean;
+  supportsHotRinse?: boolean;
+  supportsRinseHold?: boolean;
+  supportsEco?: boolean;
+  supportsAroma?: boolean;
+  supportsAntiCrease?: boolean;
+}> = {
+  'Wash + Dry 2Hr': {
+    allowedTemps: ['Cold', '30°C', '40°C'],
+    allowedSpins: ['400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM'],
+    supportsDry: true,
+    supportsSteam: false,
+    supportsPrewash: false,
+    supportsSoak: false,
+  },
+  'Wash + Dry 4Hr': {
+    allowedTemps: ['Cold', '30°C', '40°C'],
+    allowedSpins: ['400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM', '1400 RPM'],
+    supportsDry: true,
+    supportsSteam: false,
+    supportsPrewash: false,
+    supportsSoak: false,
+  },
+  'Steam & Dry': {
+    allowedTemps: ['Cold', '30°C', '40°C'],
+    allowedSpins: ['400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM', '1400 RPM'],
+    supportsDry: true,
+    supportsSteam: true,
+    supportsPrewash: false,
+    supportsSoak: false,
+  },
+  'Refresh': {
+    allowedTemps: ['Cold'],
+    allowedSpins: ['No Spin'],
+    supportsDry: false,
+    supportsSteam: true,
+    supportsPrewash: false,
+    supportsSoak: false,
+    supportsExtraRinse: false,
+    supportsHotRinse: false,
+    supportsRinseHold: false,
+    supportsEco: false,
+  },
+  'Power Steam': {
+    allowedTemps: ['Cold', '30°C', '40°C'],
+    allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM'],
+    supportsDry: false,
+    supportsSteam: true,
+  },
+  'CradleWash®': {
+    allowedTemps: ['Cold', '30°C', '40°C'],
+    allowedSpins: ['No Spin', '400 RPM', '600 RPM'],
+    supportsDry: false,
+    supportsSteam: false,
+    supportsPrewash: false,
+    supportsSoak: false,
+    supportsTimeSaver: false,
+  },
+  'Wool': {
+    allowedTemps: ['Cold', '30°C', '40°C'],
+    allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM'],
+    supportsDry: false,
+    supportsSteam: false,
+    supportsPrewash: false,
+    supportsSoak: false,
+    supportsTimeSaver: false,
+  },
+  'Bulky': {
+    allowedTemps: ['Cold', '40°C', '60°C'],
+    allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM'],
+    supportsDry: false,
+  },
+  'Baby Wear': {
+    allowedTemps: ['Cold', '40°C', '60°C'],
+    allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM'],
+    supportsDry: false,
+    supportsSteam: true,
+  },
+  'Anti-Allergen': {
+    allowedTemps: ['40°C', '60°C', '95°C'],
+    allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM', '1000 RPM'],
+    supportsDry: false,
+    supportsSteam: true,
+  },
+  'Synthetic': {
+    allowedTemps: ['Cold', '30°C', '40°C', '60°C'],
+    allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM'],
+    supportsDry: false,
+  },
+  'Cotton': {
+    allowedTemps: ['Cold', '30°C', '40°C', '60°C', '95°C'],
+    allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM', '1400 RPM'],
+    supportsDry: false,
+  },
+  'Mix / Daily': {
+    allowedTemps: ['Cold', '30°C', '40°C', '60°C'],
+    allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM'],
+    supportsDry: false,
+  },
+  'Express 15\'': {
+    allowedTemps: ['Cold', '30°C', '40°C'],
+    allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM'],
+    supportsDry: false,
+    supportsPrewash: false,
+    supportsSoak: false,
+    supportsTimeSaver: false,
+  },
+  'Tub Clean': {
+    allowedTemps: ['Cold', '60°C', '95°C'],
+    allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM'],
+    supportsDry: false,
+    supportsSteam: false,
+    supportsPrewash: false,
+    supportsSoak: false,
+    supportsTimeSaver: false,
+    supportsExtraRinse: false,
+    supportsHotRinse: false,
+    supportsRinseHold: false,
+    supportsEco: false,
+    supportsAroma: false,
+    supportsAntiCrease: false,
+  },
+};
+
 export class IFBWasherCard extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config!: IFBWasherCardConfig;
   @state() private _expanded = false;
-  @state() private _openPanel: 'program' | 'temp' | 'spin' | 'delay' | null = null;
-  @state() private _ghDropdown: 'program' | 'spin' | 'temp' | 'delay' | null = null;
+  @state() private _openPanel: 'program' | 'temp' | 'spin' | 'delay' | 'extra_rinse' | 'dry_mode' | null = null;
+  @state() private _ghDropdown: 'program' | 'spin' | 'temp' | 'delay' | 'extra_rinse' | 'dry_mode' | null = null;
 
   private _handleWindowClick = (e: MouseEvent) => {
     const path = e.composedPath();
@@ -201,6 +334,17 @@ export class IFBWasherCard extends LitElement {
     let tubTemp = c.tub_temp_sensor;
     let rpm = c.motor_speed_sensor;
     let door = c.door_locked_sensor;
+    let extraRinse = c.extra_rinse_select;
+    let dryMode = c.dry_mode_select;
+    let prewash = c.prewash_switch;
+    let soak = c.soak_switch;
+    let rinseHold = c.rinse_hold_switch;
+    let timeSaver = c.time_saver_switch;
+    let hotRinse = c.hot_rinse_switch;
+    let eco = c.eco_switch;
+    let steam = c.steam_switch;
+    let aroma = c.aroma_switch;
+    let antiCrease = c.anti_crease_switch;
     let problem = '';
     let deviceId = '';
 
@@ -229,6 +373,17 @@ export class IFBWasherCard extends LitElement {
         spin: spin || '',
         temp: temp || '',
         delay: delay || '',
+        extraRinse: extraRinse || '',
+        dryMode: dryMode || '',
+        prewash: prewash || '',
+        soak: soak || '',
+        rinseHold: rinseHold || '',
+        timeSaver: timeSaver || '',
+        hotRinse: hotRinse || '',
+        eco: eco || '',
+        steam: steam || '',
+        aroma: aroma || '',
+        antiCrease: antiCrease || '',
         childLock: childLock || '',
         state: state || '',
         remaining: remaining || '',
@@ -257,6 +412,17 @@ export class IFBWasherCard extends LitElement {
           if (!spin && (u.endsWith('_spin_speed_select') || t === 'spin_speed_select')) spin = id;
           if (!temp && (u.endsWith('_temperature_select') || t === 'temperature_select')) temp = id;
           if (!delay && (u.endsWith('_delay_start_select') || t === 'delay_start_select')) delay = id;
+          if (!extraRinse && (u.endsWith('_extra_rinse') || t === 'extra_rinse')) extraRinse = id;
+          if (!dryMode && (u.endsWith('_dry_mode') || t === 'dry_mode')) dryMode = id;
+          if (!prewash && (u.endsWith('_prewash') || t === 'prewash')) prewash = id;
+          if (!soak && (u.endsWith('_soak') || t === 'soak')) soak = id;
+          if (!rinseHold && (u.endsWith('_rinse_hold') || t === 'rinse_hold')) rinseHold = id;
+          if (!timeSaver && (u.endsWith('_time_saver') || t === 'time_saver')) timeSaver = id;
+          if (!hotRinse && (u.endsWith('_hot_rinse') || t === 'hot_rinse')) hotRinse = id;
+          if (!eco && (u.endsWith('_eco') || t === 'eco')) eco = id;
+          if (!steam && (u.endsWith('_steam') || t === 'steam')) steam = id;
+          if (!aroma && (u.endsWith('_aroma') || t === 'aroma')) aroma = id;
+          if (!antiCrease && (u.endsWith('_anti_crease') || t === 'anti_crease')) antiCrease = id;
           if (!childLock && (u.endsWith('_child_lock_switch') || t === 'child_lock_switch')) childLock = id;
           if (!state && (u.endsWith('_state') || t === 'machine_state')) state = id;
           if (!remaining && (u.endsWith('_time_remaining') || t === 'time_remaining')) remaining = id;
@@ -289,6 +455,17 @@ export class IFBWasherCard extends LitElement {
       '_spin_speed_select',
       '_temperature_select',
       '_delay_start_select',
+      '_extra_rinse',
+      '_dry_mode',
+      '_prewash',
+      '_soak',
+      '_rinse_hold',
+      '_time_saver',
+      '_hot_rinse',
+      '_eco',
+      '_steam',
+      '_aroma',
+      '_anti_crease',
       '_child_lock_switch',
       '_tub_temperature',
       '_motor_speed',
@@ -313,6 +490,17 @@ export class IFBWasherCard extends LitElement {
       spin: spin || (prefix ? `select.${prefix}_spin_speed_select` : ''),
       temp: temp || (prefix ? `select.${prefix}_temperature_select` : ''),
       delay: delay || (prefix ? `select.${prefix}_delay_start_select` : ''),
+      extraRinse: extraRinse || (prefix ? `select.${prefix}_extra_rinse` : ''),
+      dryMode: dryMode || (prefix ? `select.${prefix}_dry_mode` : ''),
+      prewash: prewash || (prefix ? `switch.${prefix}_prewash` : ''),
+      soak: soak || (prefix ? `switch.${prefix}_soak` : ''),
+      rinseHold: rinseHold || (prefix ? `switch.${prefix}_rinse_hold` : ''),
+      timeSaver: timeSaver || (prefix ? `switch.${prefix}_time_saver` : ''),
+      hotRinse: hotRinse || (prefix ? `switch.${prefix}_hot_rinse` : ''),
+      eco: eco || (prefix ? `switch.${prefix}_eco` : ''),
+      steam: steam || (prefix ? `switch.${prefix}_steam` : ''),
+      aroma: aroma || (prefix ? `switch.${prefix}_aroma` : ''),
+      antiCrease: antiCrease || (prefix ? `switch.${prefix}_anti_crease` : ''),
       childLock: childLock || (prefix ? `switch.${prefix}_child_lock_switch` : ''),
       state: state || (prefix ? `sensor.${prefix}_machine_state` : ''),
       remaining: remaining || (prefix ? `sensor.${prefix}_time_remaining` : ''),
@@ -386,6 +574,19 @@ export class IFBWasherCard extends LitElement {
     }
     if (!isOn) {
       this._showToast('Turn on the washer to toggle child lock');
+      return;
+    }
+    this._haptic('medium');
+    this._callService('switch', 'toggle', { entity_id: entityId });
+  }
+
+  private _toggleSwitch(entityId: string, isOnline: boolean, isOn: boolean): void {
+    if (!isOnline) {
+      this._showToast('Device is offline');
+      return;
+    }
+    if (!isOn) {
+      this._showToast('Turn on the washer to change options');
       return;
     }
     this._haptic('medium');
@@ -502,22 +703,83 @@ export class IFBWasherCard extends LitElement {
     const tempOptions = (tempObj?.attributes?.options as string[]) || [];
     const delayOptions = (delayObj?.attributes?.options as string[]) || [];
 
+    const extraRinseObj = entities.extraRinse ? this.hass.states[entities.extraRinse] : undefined;
+    const dryModeObj = entities.dryMode ? this.hass.states[entities.dryMode] : undefined;
+    const currentExtraRinse = extraRinseObj?.state || '';
+    const currentDryMode = dryModeObj?.state || '';
+    const extraRinseOptions = (extraRinseObj?.attributes?.options as string[]) || [];
+    const dryModeOptions = (dryModeObj?.attributes?.options as string[]) || [];
+
+    // Capabilities per Official Wash Guide Map
+    const progCaps = (programObj?.attributes || {}) as Record<string, any>;
+    const staticCaps = PROGRAM_CAPABILITIES[currentProgram] || {};
+    const allowedTemps: string[] | undefined = progCaps.allowed_temps || staticCaps.allowedTemps;
+    const allowedSpins: string[] | undefined = progCaps.allowed_spins || staticCaps.allowedSpins;
+    const supportsDry: boolean = progCaps.supports_dry ?? staticCaps.supportsDry ?? true;
+    const supportsSteam: boolean = progCaps.supports_steam ?? staticCaps.supportsSteam ?? true;
+    const supportsPrewash: boolean = progCaps.supports_prewash ?? staticCaps.supportsPrewash ?? true;
+    const supportsSoak: boolean = progCaps.supports_soak ?? staticCaps.supportsSoak ?? true;
+    const supportsTimeSaver: boolean = progCaps.supports_time_saver ?? staticCaps.supportsTimeSaver ?? true;
+    const supportsExtraRinse: boolean = progCaps.supports_extra_rinse ?? staticCaps.supportsExtraRinse ?? true;
+    const hasExtraRinseSelected = currentExtraRinse !== '' && currentExtraRinse !== '0 (None)' && currentExtraRinse !== 'None';
+    const supportsHotRinse: boolean = (progCaps.supports_hot_rinse ?? staticCaps.supportsHotRinse ?? true) && hasExtraRinseSelected;
+    const supportsRinseHold: boolean = progCaps.supports_rinse_hold ?? staticCaps.supportsRinseHold ?? true;
+    const supportsEco: boolean = progCaps.supports_eco ?? staticCaps.supportsEco ?? true;
+    const supportsAroma: boolean = progCaps.supports_aroma ?? staticCaps.supportsAroma ?? true;
+    const supportsAntiCrease: boolean = progCaps.supports_anti_crease ?? staticCaps.supportsAntiCrease ?? true;
+
+    // Modifiers list
+    const modifiers = [
+      { key: 'prewash', label: 'Pre-wash', icon: 'mdi:water-plus', entityId: entities.prewash, supported: supportsPrewash },
+      { key: 'soak', label: 'Soak', icon: 'mdi:timer-sand', entityId: entities.soak, supported: supportsSoak },
+      { key: 'rinse_hold', label: 'Rinse Hold', icon: 'mdi:pause-circle-outline', entityId: entities.rinseHold, supported: supportsRinseHold },
+      { key: 'time_saver', label: 'Time Saver', icon: 'mdi:clock-fast', entityId: entities.timeSaver, supported: supportsTimeSaver },
+      {
+        key: 'hot_rinse',
+        label: 'Hot Rinse',
+        icon: 'mdi:thermometer-water',
+        entityId: entities.hotRinse,
+        supported: supportsHotRinse,
+        blockedReason: !hasExtraRinseSelected ? 'Hot Rinse requires Extra Rinse to be selected' : undefined,
+      },
+      { key: 'eco', label: 'Eco', icon: 'mdi:leaf', entityId: entities.eco, supported: supportsEco },
+      { key: 'steam', label: 'Steam', icon: 'mdi:weather-fog', entityId: entities.steam, supported: supportsSteam },
+      { key: 'aroma', label: 'Aroma', icon: 'mdi:flower-tulip-outline', entityId: entities.aroma, supported: supportsAroma },
+      { key: 'anti_crease', label: 'Anti-Crease', icon: 'mdi:iron', entityId: entities.antiCrease, supported: supportsAntiCrease },
+    ];
+
     const isCompact = this._config.layout === 'compact';
 
     if (isCompact && !this._expanded) {
       return this._renderCompactCard(
         entities,
         title,
-        subtitle,
         isOnline,
         isOn,
         isRunning,
         isPaused,
         machineState,
         remMinutes,
-        progressPct
+        progressPct,
+        currentProgram,
+        currentSpin,
+        currentTemp
       );
     }
+
+    const filteredTempOptions = allowedTemps && allowedTemps.length > 0
+      ? tempOptions.filter((t) =>
+          allowedTemps.some((at) => t.toLowerCase().includes(at.toLowerCase()) || at.toLowerCase().includes(t.toLowerCase()))
+        )
+      : tempOptions;
+    const filteredSpinOptions = allowedSpins && allowedSpins.length > 0
+      ? spinOptions.filter((s) =>
+          allowedSpins.some((as) => s.toLowerCase().includes(as.toLowerCase()) || as.toLowerCase().includes(s.toLowerCase()))
+        )
+      : spinOptions;
+
+    const effectiveTempOptions = filteredTempOptions.length > 0 ? filteredTempOptions : (allowedTemps || []);
+    const effectiveSpinOptions = filteredSpinOptions.length > 0 ? filteredSpinOptions : (allowedSpins || []);
 
     if (this._config.full_layout === 'google_home') {
       return this._renderGoogleHomeFull(
@@ -541,9 +803,16 @@ export class IFBWasherCard extends LitElement {
         tubTemp,
         motorRpm,
         programOptions,
-        spinOptions,
-        tempOptions,
-        delayOptions
+        effectiveSpinOptions,
+        effectiveTempOptions,
+        delayOptions,
+        currentExtraRinse,
+        extraRinseOptions,
+        supportsExtraRinse,
+        currentDryMode,
+        dryModeOptions,
+        supportsDry,
+        modifiers
       );
     }
 
@@ -612,9 +881,16 @@ export class IFBWasherCard extends LitElement {
           tubTemp,
           motorRpm,
           programOptions,
-          spinOptions,
-          tempOptions,
-          delayOptions
+          effectiveSpinOptions,
+          effectiveTempOptions,
+          delayOptions,
+          currentExtraRinse,
+          extraRinseOptions,
+          supportsExtraRinse,
+          currentDryMode,
+          dryModeOptions,
+          supportsDry,
+          modifiers
         )}
 
         <!-- Diagnostics & Telemetry Footer -->
@@ -664,122 +940,167 @@ export class IFBWasherCard extends LitElement {
     `;
   }
 
-  /* ── Compact Card Rendering ── */
+  /* ── Compact Card Rendering (Aligned with AC Card) ── */
   private _renderCompactCard(
     entities: ReturnType<typeof this._resolveEntities>,
     title: string,
-    subtitle: string,
     isOnline: boolean,
     isOn: boolean,
     isRunning: boolean,
     isPaused: boolean,
     machineState: string,
     remMinutes: number,
-    progressPct: number
+    progressPct: number,
+    currentProgram: string,
+    currentSpin: string,
+    currentTemp: string
   ) {
+    const layoutClass = this._config.full_layout === 'google_home' ? 'google-home' : 'classic';
+    const displayValue = isRunning
+      ? (remMinutes > 0 ? this._formatRemaining(remMinutes) : `${progressPct}%`)
+      : (isPaused ? 'Paused' : isOn ? 'Ready' : 'Off');
+
     return html`
       <ha-card
-        class="compact-card"
-        style="cursor: pointer;"
+        class="compact-card ${layoutClass}"
         @click=${() => {
           this._haptic('selection');
           this._expanded = true;
         }}
       >
-        <div class="header" style="margin-bottom: 8px;">
-          <div class="header-left">
-            <div class="title-row">
-              <ha-icon class="header-icon" icon="mdi:washing-machine"></ha-icon>
-              <div class="title">${title}</div>
-            </div>
-            <div class="subtitle">${subtitle}</div>
-          </div>
-          <div class="header-right">
-            <button
-              class="collapse-btn"
-              title="Expand Card"
-              @click=${(e: Event) => {
-                e.stopPropagation();
-                this._haptic('light');
-                this._expanded = true;
-              }}
-            >
-              <ha-icon icon="mdi:chevron-down"></ha-icon>
-            </button>
-            <button
-              class="power-btn ${isOn ? 'on' : ''} ${!isOnline ? 'disabled' : ''}"
-              title="${!isOnline ? 'Device is offline' : isOn ? 'Turn Off' : 'Turn On'}"
-              @click=${(e: Event) => {
-                e.stopPropagation();
-                this._togglePower(entities, isOnline);
-              }}
-            >
-              <ha-icon icon="mdi:power"></ha-icon>
-            </button>
-          </div>
+        <div class="compact-header">
+          <button
+            class="compact-icon-btn ${isOn ? 'on' : ''} ${!isOnline ? 'disabled' : ''}"
+            title="${!isOnline ? 'Device is offline' : isOn ? 'Turn Off' : 'Turn On'}"
+            @click=${(e: Event) => {
+              e.stopPropagation();
+              this._togglePower(entities, isOnline);
+            }}
+          >
+            <ha-icon icon="mdi:power"></ha-icon>
+          </button>
+          <div class="compact-title">${title}</div>
+          <ha-icon class="compact-chevron" icon="mdi:chevron-right"></ha-icon>
         </div>
-        ${this._renderCompactBody(
-          entities,
-          isOnline,
-          isOn,
-          isRunning,
-          isPaused,
-          machineState,
-          remMinutes,
-          progressPct
-        )}
+
+        <div class="compact-center">
+          <div class="compact-value">${displayValue}</div>
+        </div>
+
+        <div class="compact-footer">
+          <button
+            class="compact-action-btn ${isRunning ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
+            title="${isRunning ? 'Pause Cycle' : isPaused ? 'Resume Cycle' : 'Start Cycle'}"
+            @click=${(e: Event) => {
+              e.stopPropagation();
+              if (isRunning) {
+                this._triggerButton(entities.pause, isOnline, isOn);
+              } else {
+                this._triggerButton(entities.start, isOnline, isOn);
+              }
+            }}
+          >
+            <ha-icon icon="${isRunning ? 'mdi:pause' : 'mdi:play'}"></ha-icon>
+          </button>
+
+          <div class="compact-subtitle" style="display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              ${currentTemp
+                ? html`
+                    <span style="display: flex; align-items: center; gap: 3px;">
+                      <ha-icon icon="mdi:thermometer" style="--mdc-icon-size: 13px;"></ha-icon>${currentTemp}
+                    </span>
+                  `
+                : nothing}
+              ${currentSpin
+                ? html`
+                    <span style="display: flex; align-items: center; gap: 3px;">
+                      <ha-icon icon="mdi:speedometer" style="--mdc-icon-size: 13px;"></ha-icon>${currentSpin}
+                    </span>
+                  `
+                : nothing}
+            </div>
+            <div style="font-size: 0.75rem; opacity: 0.7; margin-top: 2px;">
+              ${currentProgram || machineState}
+            </div>
+          </div>
+
+          <button
+            class="compact-action-btn ${!isOnline || !isOn || (!isRunning && !isPaused) ? 'disabled' : ''}"
+            title="Cancel Cycle"
+            @click=${(e: Event) => {
+              e.stopPropagation();
+              this._triggerButton(entities.cancel, isOnline, isOn);
+            }}
+          >
+            <ha-icon icon="mdi:stop"></ha-icon>
+          </button>
+        </div>
       </ha-card>
     `;
   }
 
-  /* ── Compact Body Rendering ── */
-  private _renderCompactBody(
-    entities: ReturnType<typeof this._resolveEntities>,
+  /* ── Cycle Modifiers Rendering ── */
+  private _renderModifiers(
+    modifiers: Array<{
+      key: string;
+      label: string;
+      icon: string;
+      entityId?: string;
+      supported: boolean;
+      blockedReason?: string;
+    }>,
     isOnline: boolean,
     isOn: boolean,
-    isRunning: boolean,
-    isPaused: boolean,
-    machineState: string,
-    remMinutes: number,
-    progressPct: number
+    isRunning: boolean
   ) {
+    const activeModifiers = modifiers.filter((m) => !!m.entityId);
+    if (activeModifiers.length === 0) return nothing;
+
     return html`
-      <div class="compact-view">
-        <div class="compact-info">
-          <div class="compact-title">
-            ${isRunning
-              ? `${this._formatRemaining(remMinutes)} remaining (${progressPct}%)`
-              : machineState}
-          </div>
-          <div class="compact-state">${isRunning ? machineState : isOn ? 'Ready' : 'Standby'}</div>
-        </div>
-        <div class="compact-actions">
-          ${isRunning
-            ? html`
-                <button
-                  class="compact-action-icon ${!isOnline || !isOn ? 'disabled' : ''}"
-                  title="Pause Cycle"
-                  @click=${() => this._triggerButton(entities.pause, isOnline, isOn)}
-                >
-                  <ha-icon icon="mdi:pause"></ha-icon>
-                </button>
-                <button
-                  class="compact-action-icon ${!isOnline || !isOn ? 'disabled' : ''}"
-                  title="Cancel Cycle"
-                  @click=${() => this._triggerButton(entities.cancel, isOnline, isOn)}
-                >
-                  <ha-icon icon="mdi:stop"></ha-icon>
-                </button>
-              `
-            : html`
-                <button
-                  class="compact-action-icon primary ${!isOnline || !isOn ? 'disabled' : ''}"
-                  title="${isPaused ? 'Resume Cycle' : 'Start Cycle'}"
-                  @click=${() => this._triggerButton(entities.start, isOnline, isOn)}
-                >
-                  <ha-icon icon="mdi:play"></ha-icon>
-                </button>
-              `}
+      <div class="modifiers-section">
+        <div class="modifiers-title">Cycle Modifiers</div>
+        <div class="modifiers-scroll">
+          ${activeModifiers.map((mod) => {
+            const stateObj = mod.entityId ? this.hass.states[mod.entityId] : undefined;
+            const isActive = stateObj?.state === 'on';
+            const isSupported = mod.supported;
+            const isBlocked = !!mod.blockedReason;
+            const isDisabled = !isOnline || !isOn || !isSupported || isBlocked || isRunning;
+
+            let tooltip = mod.label;
+            if (!isOnline) tooltip = 'Device is offline';
+            else if (!isOn) tooltip = 'Turn on washer to toggle modifiers';
+            else if (isRunning) tooltip = 'Pause cycle to toggle modifiers';
+            else if (isBlocked) tooltip = mod.blockedReason!;
+            else if (!isSupported) tooltip = `${mod.label} is not supported by current program`;
+            else tooltip = `${mod.label}: ${isActive ? 'On' : 'Off'}`;
+
+            return html`
+              <button
+                class="modifier-chip ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}"
+                title="${tooltip}"
+                @click=${() => {
+                  if (!isOnline) {
+                    this._showToast('Device is offline');
+                  } else if (!isOn) {
+                    this._showToast('Turn on washer to toggle modifiers');
+                  } else if (isRunning) {
+                    this._showToast('Pause cycle to toggle modifiers');
+                  } else if (isBlocked) {
+                    this._showToast(mod.blockedReason!);
+                  } else if (!isSupported) {
+                    this._showToast(`${mod.label} is not supported by current program`);
+                  } else if (mod.entityId) {
+                    this._toggleSwitch(mod.entityId, isOnline, isOn);
+                  }
+                }}
+              >
+                <ha-icon icon="${mod.icon}"></ha-icon>
+                <span>${mod.label}</span>
+              </button>
+            `;
+          })}
         </div>
       </div>
     `;
@@ -809,7 +1130,21 @@ export class IFBWasherCard extends LitElement {
     programOptions: string[],
     spinOptions: string[],
     tempOptions: string[],
-    delayOptions: string[]
+    delayOptions: string[],
+    currentExtraRinse: string,
+    extraRinseOptions: string[],
+    supportsExtraRinse: boolean,
+    currentDryMode: string,
+    dryModeOptions: string[],
+    supportsDry: boolean,
+    modifiers: Array<{
+      key: string;
+      label: string;
+      icon: string;
+      entityId?: string;
+      supported: boolean;
+      blockedReason?: string;
+    }>
   ) {
     const displayValue = isRunning
       ? this._formatRemaining(remMinutes)
@@ -1088,7 +1423,104 @@ export class IFBWasherCard extends LitElement {
                 `
               : nothing}
           </div>
+
+          <!-- Extra Rinse Dropdown -->
+          ${entities.extraRinse
+            ? html`
+                <div class="gh-select-wrapper ${this._ghDropdown === 'extra_rinse' ? 'active' : ''}">
+                  <button
+                    class="gh-custom-select ${!isOnline || !isOn || !supportsExtraRinse ? 'disabled' : ''}"
+                    @click=${(e: Event) => {
+                      e.stopPropagation();
+                      if (!isOnline) this._showToast('Device is offline');
+                      else if (!isOn) this._showToast('Turn on the washer to adjust settings');
+                      else if (!supportsExtraRinse) this._showToast('Extra Rinse is not supported by current program');
+                      else {
+                        this._haptic('selection');
+                        this._ghDropdown = this._ghDropdown === 'extra_rinse' ? null : 'extra_rinse';
+                      }
+                    }}
+                  >
+                    <span>Extra Rinse: ${currentExtraRinse || '0 (None)'}</span>
+                    <ha-icon icon="mdi:chevron-down"></ha-icon>
+                  </button>
+                  ${this._ghDropdown === 'extra_rinse'
+                    ? html`
+                        <div class="gh-dropdown-menu">
+                          ${(extraRinseOptions.length > 0
+                            ? extraRinseOptions
+                            : ['0 (None)', '1', '2', '3']
+                          ).map(
+                            (er) => html`
+                              <button
+                                class="gh-dropdown-item ${currentExtraRinse === er ? 'active' : ''}"
+                                @click=${(e: Event) => {
+                                  e.stopPropagation();
+                                  this._ghDropdown = null;
+                                  this._selectOption(entities.extraRinse, er, isOnline, isOn, isRunning, false);
+                                }}
+                              >
+                                ${er}
+                              </button>
+                            `
+                          )}
+                        </div>
+                      `
+                    : nothing}
+                </div>
+              `
+            : nothing}
+
+          <!-- Dry Mode Dropdown -->
+          ${entities.dryMode
+            ? html`
+                <div class="gh-select-wrapper ${this._ghDropdown === 'dry_mode' ? 'active' : ''}">
+                  <button
+                    class="gh-custom-select ${!isOnline || !isOn || !supportsDry ? 'disabled' : ''}"
+                    @click=${(e: Event) => {
+                      e.stopPropagation();
+                      if (!isOnline) this._showToast('Device is offline');
+                      else if (!isOn) this._showToast('Turn on the washer to adjust settings');
+                      else if (!supportsDry) this._showToast('Dry is not supported by current program');
+                      else {
+                        this._haptic('selection');
+                        this._ghDropdown = this._ghDropdown === 'dry_mode' ? null : 'dry_mode';
+                      }
+                    }}
+                  >
+                    <span>Dry: ${currentDryMode || 'Off'}</span>
+                    <ha-icon icon="mdi:chevron-down"></ha-icon>
+                  </button>
+                  ${this._ghDropdown === 'dry_mode'
+                    ? html`
+                        <div class="gh-dropdown-menu">
+                          ${(dryModeOptions.length > 0
+                            ? dryModeOptions
+                            : ['Off', 'Cupboard Dry', 'Iron Dry', 'Time Dry (30m)', 'Time Dry (60m)', 'Time Dry (120m)']
+                          ).map(
+                            (dm) => html`
+                              <button
+                                class="gh-dropdown-item ${currentDryMode === dm ? 'active' : ''}"
+                                @click=${(e: Event) => {
+                                  e.stopPropagation();
+                                  this._ghDropdown = null;
+                                  this._selectOption(entities.dryMode, dm, isOnline, isOn, isRunning, false);
+                                }}
+                              >
+                                ${dm}
+                              </button>
+                            `
+                          )}
+                        </div>
+                      `
+                    : nothing}
+                </div>
+              `
+            : nothing}
         </div>
+
+        <!-- Cycle Modifiers Section -->
+        ${this._renderModifiers(modifiers, isOnline, isOn, isRunning)}
 
         <!-- Diagnostics & Telemetry Footer -->
         <div class="footer">
@@ -1163,7 +1595,21 @@ export class IFBWasherCard extends LitElement {
     programOptions: string[],
     spinOptions: string[],
     tempOptions: string[],
-    delayOptions: string[]
+    delayOptions: string[],
+    currentExtraRinse: string,
+    extraRinseOptions: string[],
+    supportsExtraRinse: boolean,
+    currentDryMode: string,
+    dryModeOptions: string[],
+    supportsDry: boolean,
+    modifiers: Array<{
+      key: string;
+      label: string;
+      icon: string;
+      entityId?: string;
+      supported: boolean;
+      blockedReason?: string;
+    }>
   ) {
     const isSpinningFast = motorRpm > 400;
 
@@ -1385,6 +1831,78 @@ export class IFBWasherCard extends LitElement {
             <ha-icon class="setting-tile-chevron" icon="mdi:chevron-down"></ha-icon>
           </div>
         </div>
+
+        <!-- Extra Rinse Tile -->
+        ${entities.extraRinse
+          ? html`
+              <div
+                class="setting-tile ${this._openPanel === 'extra_rinse' ? 'active' : ''} ${!isOnline || !isOn || !supportsExtraRinse ? 'disabled' : ''}"
+                title="${!isOnline
+                  ? 'Device is offline'
+                  : !isOn
+                  ? 'Turn on the washer to adjust extra rinse'
+                  : !supportsExtraRinse
+                  ? 'Extra Rinse is not supported by current program'
+                  : 'Select Extra Rinse'}"
+                @click=${() => {
+                  if (!isOnline) {
+                    this._showToast('Device is offline');
+                  } else if (!isOn) {
+                    this._showToast('Turn on the washer to adjust extra rinse');
+                  } else if (!supportsExtraRinse) {
+                    this._showToast('Extra Rinse is not supported by current program');
+                  } else {
+                    this._openPanel = this._openPanel === 'extra_rinse' ? null : 'extra_rinse';
+                  }
+                }}
+              >
+                <div class="setting-tile-label">
+                  <ha-icon icon="mdi:water-sync"></ha-icon>
+                  <span>Rinse+</span>
+                </div>
+                <div class="setting-tile-value-row">
+                  <span class="setting-tile-value">${currentExtraRinse || '0'}</span>
+                  <ha-icon class="setting-tile-chevron" icon="mdi:chevron-down"></ha-icon>
+                </div>
+              </div>
+            `
+          : nothing}
+
+        <!-- Dry Mode Tile -->
+        ${entities.dryMode
+          ? html`
+              <div
+                class="setting-tile ${this._openPanel === 'dry_mode' ? 'active' : ''} ${!isOnline || !isOn || !supportsDry ? 'disabled' : ''}"
+                title="${!isOnline
+                  ? 'Device is offline'
+                  : !isOn
+                  ? 'Turn on the washer to adjust dry mode'
+                  : !supportsDry
+                  ? 'Dry is not supported by current program'
+                  : 'Select Dry Mode'}"
+                @click=${() => {
+                  if (!isOnline) {
+                    this._showToast('Device is offline');
+                  } else if (!isOn) {
+                    this._showToast('Turn on the washer to adjust dry mode');
+                  } else if (!supportsDry) {
+                    this._showToast('Dry is not supported by current program');
+                  } else {
+                    this._openPanel = this._openPanel === 'dry_mode' ? null : 'dry_mode';
+                  }
+                }}
+              >
+                <div class="setting-tile-label">
+                  <ha-icon icon="mdi:weather-sunny"></ha-icon>
+                  <span>Dry</span>
+                </div>
+                <div class="setting-tile-value-row">
+                  <span class="setting-tile-value">${currentDryMode || 'Off'}</span>
+                  <ha-icon class="setting-tile-chevron" icon="mdi:chevron-down"></ha-icon>
+                </div>
+              </div>
+            `
+          : nothing}
       </div>
 
       <!-- Expandable Options Picker Panel -->
@@ -1497,6 +2015,71 @@ export class IFBWasherCard extends LitElement {
             </div>
           `
         : nothing}
+
+      ${this._openPanel === 'extra_rinse'
+        ? html`
+            <div class="picker-panel">
+              ${(extraRinseOptions.length > 0
+                ? extraRinseOptions
+                : ['0 (None)', '1', '2', '3']
+              ).map((er) => {
+                const isSelected = currentExtraRinse === er;
+                return html`
+                  <button
+                    class="picker-opt ${isSelected ? 'sel' : ''}"
+                    @click=${() => {
+                      this._selectOption(
+                        entities.extraRinse,
+                        er,
+                        isOnline,
+                        isOn,
+                        isRunning,
+                        false
+                      );
+                      this._openPanel = null;
+                    }}
+                  >
+                    ${er}
+                  </button>
+                `;
+              })}
+            </div>
+          `
+        : nothing}
+
+      ${this._openPanel === 'dry_mode'
+        ? html`
+            <div class="picker-panel">
+              ${(dryModeOptions.length > 0
+                ? dryModeOptions
+                : ['Off', 'Cupboard Dry', 'Iron Dry', 'Time Dry (30m)', 'Time Dry (60m)', 'Time Dry (120m)']
+              ).map((dm) => {
+                const isSelected = currentDryMode === dm;
+                return html`
+                  <button
+                    class="picker-opt ${isSelected ? 'sel' : ''}"
+                    @click=${() => {
+                      this._selectOption(
+                        entities.dryMode,
+                        dm,
+                        isOnline,
+                        isOn,
+                        isRunning,
+                        false
+                      );
+                      this._openPanel = null;
+                    }}
+                  >
+                    ${dm}
+                  </button>
+                `;
+              })}
+            </div>
+          `
+        : nothing}
+
+      <!-- Modifiers Section -->
+      ${this._renderModifiers(modifiers, isOnline, isOn, isRunning)}
     `;
   }
 }

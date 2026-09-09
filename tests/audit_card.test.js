@@ -151,6 +151,39 @@ check(
   !stylesFile.includes('.collapse-btn.collapsed ha-icon')
 );
 
+// 15. Compact Card AC Alignment
+check(
+  'Compact card follows MirAIe AC card layout with header power/title/chevron, center hero, and symmetric footer',
+  stylesFile.includes('.compact-card.classic') &&
+  stylesFile.includes('.compact-card.google-home') &&
+  stylesFile.includes('.compact-header') &&
+  stylesFile.includes('.compact-chevron') &&
+  stylesFile.includes('.compact-center') &&
+  stylesFile.includes('.compact-value') &&
+  stylesFile.includes('.compact-footer') &&
+  cardFile.includes('class="compact-icon-btn ${isOn ? \'on\' : \'\'}')
+);
+
+// 16. Cycle Modifiers & Capability Gating
+check(
+  'Cycle modifiers section and modifier chips support capability gating and Wash Guide Map',
+  stylesFile.includes('.modifiers-section') &&
+  stylesFile.includes('.modifier-chip') &&
+  cardFile.includes('PROGRAM_CAPABILITIES') &&
+  cardFile.includes('_renderModifiers') &&
+  cardFile.includes('Hot Rinse requires Extra Rinse to be selected')
+);
+
+// 17. Extra Rinse & Dry Mode Controls
+check(
+  'Exposes Extra Rinse and Dry Mode controls across classic tiles and Google Home dropdowns',
+  cardFile.includes('extraRinse') &&
+  cardFile.includes('dryMode') &&
+  cardFile.includes('Rinse+') &&
+  cardFile.includes('supportsExtraRinse') &&
+  cardFile.includes('supportsDry')
+);
+
 if (errors > 0) {
   console.error(`\nAudit completed with ${errors} error(s).`);
   process.exit(1);
