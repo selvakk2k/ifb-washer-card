@@ -115,6 +115,33 @@ check(
   stylesFile.includes('.gh-custom-select')
 );
 
+// 11. Classic Setting Tiles & Picker Panel
+check(
+  'Classic layout uses setting tiles dropdowns for program, temp, spin, and delay',
+  stylesFile.includes('.setting-tiles') &&
+  stylesFile.includes('.setting-tile') &&
+  stylesFile.includes('.picker-panel') &&
+  cardFile.includes('mdi:format-list-bulleted-type') &&
+  cardFile.includes('mdi:timer-outline')
+);
+
+// 12. Telemetry Footer Tub Label & Child Lock
+check(
+  'Telemetry footer explicitly labels Tub temperature and includes interactive Child Lock',
+  cardFile.includes('Tub: ${tubTemp}°C') &&
+  cardFile.includes('this._toggleChildLock(entities.childLock') &&
+  stylesFile.includes('.footer-item.interactive')
+);
+
+// 13. Visual Editor Companion & Sensor Selectors
+check(
+  'Visual editor getConfigForm exposes Display Sensors and Companion Controls expandable sections',
+  cardFile.includes('Display Sensors (Auto-Discovered if blank)') &&
+  cardFile.includes('Companion Controls (Auto-Discovered if blank)') &&
+  cardFile.includes('tub_temp_sensor') &&
+  cardFile.includes('child_lock_switch')
+);
+
 if (errors > 0) {
   console.error(`\nAudit completed with ${errors} error(s).`);
   process.exit(1);

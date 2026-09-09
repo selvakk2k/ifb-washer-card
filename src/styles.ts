@@ -340,6 +340,118 @@ export const styles = css`
     --mdc-icon-size: 18px;
   }
 
+  /* ── Wash Program, Temp, Spin & Delay Setting Tiles ── */
+  .setting-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .setting-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--appliance-border);
+    background: var(--appliance-surface);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: left;
+    min-width: 0;
+  }
+  .setting-tile:hover:not(:disabled):not(.disabled) {
+    background: var(--appliance-surface-hover);
+    border-color: color-mix(in srgb, var(--appliance-accent) 40%, var(--appliance-border));
+  }
+  .setting-tile.active {
+    background: var(--appliance-active-bg);
+    border-color: var(--appliance-active-border);
+  }
+  .setting-tile:disabled, .setting-tile.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .setting-tile-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--appliance-text-2);
+  }
+  .setting-tile-label ha-icon {
+    --mdc-icon-size: 13px;
+    color: var(--appliance-text-2);
+  }
+  .setting-tile-value-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 6px;
+  }
+  .setting-tile-value {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: var(--appliance-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .setting-tile-chevron {
+    --mdc-icon-size: 14px;
+    color: var(--appliance-text-2);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+  .setting-tile.active .setting-tile-chevron {
+    transform: rotate(180deg);
+    color: var(--appliance-accent);
+  }
+
+  /* ── Picker panel (setting options) ── */
+  .picker-panel {
+    margin-bottom: 12px;
+    border-radius: 14px;
+    background: var(--appliance-surface);
+    border: 1px solid var(--appliance-border);
+    padding: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    animation: slideDown 0.15s ease;
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .picker-opt {
+    padding: 8px 14px;
+    border-radius: 16px;
+    border: 1px solid var(--appliance-border);
+    background: transparent;
+    color: var(--appliance-text-2);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    outline: none;
+  }
+  .picker-opt:hover {
+    background: var(--appliance-surface-hover);
+    color: var(--appliance-text);
+  }
+  .picker-opt.sel {
+    background: var(--appliance-active-bg);
+    border-color: var(--appliance-active-border);
+    color: var(--appliance-accent);
+    font-weight: 700;
+  }
+
   /* ── Section Dividers & Headers ── */
   .section-label {
     font-size: 0.74rem;
@@ -471,6 +583,16 @@ export const styles = css`
   .footer-item ha-icon {
     --mdc-icon-size: 15px;
     color: var(--appliance-text-2);
+  }
+  .footer-item.interactive {
+    cursor: pointer;
+    transition: color 0.15s ease;
+  }
+  .footer-item.interactive:hover {
+    color: var(--appliance-text);
+  }
+  .footer-item.interactive:hover ha-icon {
+    color: var(--appliance-accent);
   }
   .footer-dot {
     width: 7px;

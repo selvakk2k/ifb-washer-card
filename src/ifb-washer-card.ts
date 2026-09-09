@@ -7,13 +7,15 @@ import { styles } from './styles';
 export class IFBWasherCard extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config!: IFBWasherCardConfig;
-  @state() private _collapsed = false;
+  @state() private _expanded = false;
+  @state() private _openPanel: 'program' | 'temp' | 'spin' | 'delay' | null = null;
   @state() private _ghDropdown: 'program' | 'spin' | 'temp' | 'delay' | null = null;
 
   private _handleWindowClick = (e: MouseEvent) => {
     const path = e.composedPath();
-    if (this._ghDropdown && !path.includes(this)) {
+    if ((this._ghDropdown || this._openPanel) && !path.includes(this)) {
       this._ghDropdown = null;
+      this._openPanel = null;
     }
   };
 
@@ -67,7 +69,7 @@ export class IFBWasherCard extends LitElement {
   }
 
   public getCardSize(): number {
-    return this._config?.layout === 'compact' || this._collapsed ? 2 : 5;
+    return this._config?.layout === 'compact' && !this._expanded ? 2 : 5;
   }
 
   /* ── Native Visual Configuration Editor ── */
@@ -120,10 +122,43 @@ export class IFBWasherCard extends LitElement {
         {
           name: '',
           type: 'expandable',
-          title: 'Theming & Colors',
+          title: 'Display Sensors (Auto-Discovered if blank)',
+          icon: 'mdi:thermometer',
           schema: [
-            { name: 'accent_color', label: 'Accent Color Override', selector: { text: {} } },
-            { name: 'main_color', label: 'Background Color Override', selector: { text: {} } },
+            { name: 'tub_temp_sensor', label: 'Tub Temperature Sensor', selector: { entity: { domain: 'sensor' } } },
+            { name: 'motor_speed_sensor', label: 'Motor Speed Sensor', selector: { entity: { domain: 'sensor' } } },
+            { name: 'time_remaining_sensor', label: 'Time Remaining Sensor', selector: { entity: { domain: 'sensor' } } },
+            { name: 'cycle_progress_sensor', label: 'Cycle Progress Sensor', selector: { entity: { domain: 'sensor' } } },
+            { name: 'door_locked_sensor', label: 'Door Locked Sensor', selector: { entity: { domain: 'binary_sensor' } } },
+            { name: 'machine_state_sensor', label: 'Machine State Sensor', selector: { entity: { domain: 'sensor' } } },
+            { name: 'program_duration_sensor', label: 'Program Duration Sensor', selector: { entity: { domain: 'sensor' } } },
+          ],
+        },
+        {
+          name: '',
+          type: 'expandable',
+          title: 'Companion Controls (Auto-Discovered if blank)',
+          icon: 'mdi:toggle-switch-outline',
+          schema: [
+            { name: 'power_switch', label: 'Power Switch', selector: { entity: { domain: 'switch' } } },
+            { name: 'program_select', label: 'Program Select', selector: { entity: { domain: 'select' } } },
+            { name: 'spin_select', label: 'Spin Speed Select', selector: { entity: { domain: 'select' } } },
+            { name: 'temperature_select', label: 'Temperature Select', selector: { entity: { domain: 'select' } } },
+            { name: 'delay_select', label: 'Delay Start Select', selector: { entity: { domain: 'select' } } },
+            { name: 'start_button', label: 'Start Button', selector: { entity: { domain: 'button' } } },
+            { name: 'pause_button', label: 'Pause Button', selector: { entity: { domain: 'button' } } },
+            { name: 'cancel_button', label: 'Cancel Button', selector: { entity: { domain: 'button' } } },
+            { name: 'child_lock_switch', label: 'Child Lock Switch', selector: { entity: { domain: 'switch' } } },
+          ],
+        },
+        {
+          name: '',
+          type: 'expandable',
+          title: 'Theming & Colors',
+          icon: 'mdi:palette',
+          schema: [
+            { name: 'accent_color', label: 'Accent Color Override', selector: { ui_color: {} } },
+            { name: 'main_color', label: 'Background Color Override', selector: { ui_color: {} } },
           ],
         },
       ],
@@ -464,9 +499,23 @@ export class IFBWasherCard extends LitElement {
     const delayOptions = (delayObj?.attributes?.options as string[]) || [];
 
     const isCompact = this._config.layout === 'compact';
-    const isCollapsed = this._collapsed;
 
-    if (this._config.full_layout === 'google_home' && !(isCompact && isCollapsed)) {
+    if (isCompact && !this._expanded) {
+      return this._renderCompactCard(
+        entities,
+        title,
+        subtitle,
+        isOnline,
+        isOn,
+        isRunning,
+        isPaused,
+        machineState,
+        remMinutes,
+        progressPct
+      );
+    }
+
+    if (this._config.full_layout === 'google_home') {
       return this._renderGoogleHomeFull(
         entities,
         title,
@@ -511,14 +560,15 @@ export class IFBWasherCard extends LitElement {
             <div class="subtitle">${subtitle}</div>
           </div>
           <div class="header-right">
-            ${!isCompact
+            ${isCompact
               ? html`
                   <button
-                    class="collapse-btn ${isCollapsed ? 'collapsed' : ''}"
-                    title="${isCollapsed ? 'Expand Card' : 'Collapse Card'}"
-                    @click=${() => {
+                    class="collapse-btn"
+                    title="Collapse Card"
+                    @click=${(e: Event) => {
+                      e.stopPropagation();
                       this._haptic('light');
-                      this._collapsed = !this._collapsed;
+                      this._expanded = false;
                     }}
                   >
                     <ha-icon icon="mdi:chevron-up"></ha-icon>
@@ -535,44 +585,33 @@ export class IFBWasherCard extends LitElement {
           </div>
         </div>
 
-        ${isCompact || isCollapsed
-          ? this._renderCompactBody(
-              entities,
-              isOnline,
-              isOn,
-              isRunning,
-              isPaused,
-              machineState,
-              remMinutes,
-              progressPct
-            )
-          : this._renderFullBody(
-              entities,
-              isOnline,
-              isOn,
-              isRunning,
-              isPaused,
-              isComplete,
-              machineState,
-              remMinutes,
-              progressPct,
-              radius,
-              circumference,
-              strokeDashoffset,
-              currentProgram,
-              currentSpin,
-              currentTemp,
-              currentDelay,
-              isChildLockActive,
-              isDoorLocked,
-              hasProblem,
-              tubTemp,
-              motorRpm,
-              programObj?.attributes?.options || [],
-              spinObj?.attributes?.options || [],
-              tempObj?.attributes?.options || [],
-              delayObj?.attributes?.options || []
-            )}
+        ${this._renderFullBody(
+          entities,
+          isOnline,
+          isOn,
+          isRunning,
+          isPaused,
+          isComplete,
+          machineState,
+          remMinutes,
+          progressPct,
+          radius,
+          circumference,
+          strokeDashoffset,
+          currentProgram,
+          currentSpin,
+          currentTemp,
+          currentDelay,
+          isChildLockActive,
+          isDoorLocked,
+          hasProblem,
+          tubTemp,
+          motorRpm,
+          programOptions,
+          spinOptions,
+          tempOptions,
+          delayOptions
+        )}
 
         <!-- Diagnostics & Telemetry Footer -->
         <div class="footer">
@@ -585,12 +624,25 @@ export class IFBWasherCard extends LitElement {
             <span class="footer-dot ${isDoorLocked ? 'red' : 'green'}"></span>
             <span>${isDoorLocked ? 'Door Locked' : 'Door Unlocked'}</span>
           </div>
+          •
+          <div
+            class="footer-item interactive"
+            title="${!isOnline
+              ? 'Device is offline'
+              : !isOn
+              ? 'Turn on the washer to toggle child lock'
+              : 'Toggle Child Lock'}"
+            @click=${() => this._toggleChildLock(entities.childLock, isOnline, isOn)}
+          >
+            <ha-icon icon="${isChildLockActive ? 'mdi:account-lock' : 'mdi:account-lock-open-outline'}"></ha-icon>
+            <span>Child Lock ${isChildLockActive ? 'On' : 'Off'}</span>
+          </div>
           ${tubTemp > 0
             ? html`
                 •
                 <div class="footer-item">
                   <ha-icon icon="mdi:thermometer"></ha-icon>
-                  <span>${tubTemp}°C</span>
+                  <span>Tub: ${tubTemp}°C</span>
                 </div>
               `
             : nothing}
@@ -604,6 +656,74 @@ export class IFBWasherCard extends LitElement {
               `
             : nothing}
         </div>
+      </ha-card>
+    `;
+  }
+
+  /* ── Compact Card Rendering ── */
+  private _renderCompactCard(
+    entities: ReturnType<typeof this._resolveEntities>,
+    title: string,
+    subtitle: string,
+    isOnline: boolean,
+    isOn: boolean,
+    isRunning: boolean,
+    isPaused: boolean,
+    machineState: string,
+    remMinutes: number,
+    progressPct: number
+  ) {
+    return html`
+      <ha-card
+        class="compact-card"
+        style="cursor: pointer;"
+        @click=${() => {
+          this._haptic('selection');
+          this._expanded = true;
+        }}
+      >
+        <div class="header" style="margin-bottom: 8px;">
+          <div class="header-left">
+            <div class="title-row">
+              <ha-icon class="header-icon" icon="mdi:washing-machine"></ha-icon>
+              <div class="title">${title}</div>
+            </div>
+            <div class="subtitle">${subtitle}</div>
+          </div>
+          <div class="header-right">
+            <button
+              class="collapse-btn collapsed"
+              title="Expand Card"
+              @click=${(e: Event) => {
+                e.stopPropagation();
+                this._haptic('light');
+                this._expanded = true;
+              }}
+            >
+              <ha-icon icon="mdi:chevron-down"></ha-icon>
+            </button>
+            <button
+              class="power-btn ${isOn ? 'on' : ''} ${!isOnline ? 'disabled' : ''}"
+              title="${!isOnline ? 'Device is offline' : isOn ? 'Turn Off' : 'Turn On'}"
+              @click=${(e: Event) => {
+                e.stopPropagation();
+                this._togglePower(entities, isOnline);
+              }}
+            >
+              <ha-icon icon="mdi:power"></ha-icon>
+            </button>
+          </div>
+        </div>
+        ${this._renderCompactBody(
+          entities,
+          isOnline,
+          isOn,
+          isRunning,
+          isPaused,
+          machineState,
+          remMinutes,
+          progressPct
+        )}
       </ha-card>
     `;
   }
@@ -708,10 +828,12 @@ export class IFBWasherCard extends LitElement {
               ? html`
                   <button
                     class="gh-power-btn"
+                    style="background: transparent; color: var(--appliance-text-2);"
                     title="Collapse card"
-                    @click=${() => {
+                    @click=${(e: Event) => {
+                      e.stopPropagation();
                       this._haptic('light');
-                      this._collapsed = true;
+                      this._expanded = false;
                     }}
                   >
                     <ha-icon icon="mdi:chevron-up"></ha-icon>
@@ -964,26 +1086,6 @@ export class IFBWasherCard extends LitElement {
           </div>
         </div>
 
-        <!-- Auxiliary Status Chips -->
-        <div class="aux-chips-row" style="margin-bottom: 12px;">
-          ${entities.childLock
-            ? html`
-                <div
-                  class="chip-btn ${isChildLockActive ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
-                  title="Toggle Child Lock"
-                  @click=${() => this._toggleChildLock(entities.childLock, isOnline, isOn)}
-                >
-                  <ha-icon icon="${isChildLockActive ? 'mdi:account-lock' : 'mdi:account-lock-open-outline'}"></ha-icon>
-                  <span>${isChildLockActive ? 'Child Lock Active' : 'Child Lock Off'}</span>
-                </div>
-              `
-            : nothing}
-          <div class="chip-btn ${isDoorLocked ? 'active' : ''}">
-            <ha-icon icon="${isDoorLocked ? 'mdi:door-closed-lock' : 'mdi:door-open'}"></ha-icon>
-            <span>${isDoorLocked ? 'Door Locked' : 'Door Unlocked'}</span>
-          </div>
-        </div>
-
         <!-- Diagnostics & Telemetry Footer -->
         <div class="footer">
           <div class="footer-item">
@@ -995,12 +1097,25 @@ export class IFBWasherCard extends LitElement {
             <span class="footer-dot ${isDoorLocked ? 'red' : 'green'}"></span>
             <span>${isDoorLocked ? 'Door Locked' : 'Door Unlocked'}</span>
           </div>
+          •
+          <div
+            class="footer-item interactive"
+            title="${!isOnline
+              ? 'Device is offline'
+              : !isOn
+              ? 'Turn on the washer to toggle child lock'
+              : 'Toggle Child Lock'}"
+            @click=${() => this._toggleChildLock(entities.childLock, isOnline, isOn)}
+          >
+            <ha-icon icon="${isChildLockActive ? 'mdi:account-lock' : 'mdi:account-lock-open-outline'}"></ha-icon>
+            <span>Child Lock ${isChildLockActive ? 'On' : 'Off'}</span>
+          </div>
           ${tubTemp > 0
             ? html`
                 •
                 <div class="footer-item">
                   <ha-icon icon="mdi:thermometer"></ha-icon>
-                  <span>${tubTemp}°C</span>
+                  <span>Tub: ${tubTemp}°C</span>
                 </div>
               `
             : nothing}
@@ -1145,120 +1260,239 @@ export class IFBWasherCard extends LitElement {
         </button>
       </div>
 
-      <!-- Program Selection Bar -->
-      <div class="section-label">Wash Program</div>
-      <div class="segmented-bar scrollable">
-        ${(programOptions.length > 0
-          ? programOptions
-          : ['Mix / Daily', 'Cotton', 'Express 15', 'Tub Clean']
-        ).map((prog) => {
-          const isSelected = currentProgram === prog;
-          const isGuarded = isRunning;
-          return html`
-            <button
-              class="segment-btn ${isSelected ? 'active' : ''} ${!isOnline || !isOn || isGuarded ? 'disabled' : ''}"
-              title="${!isOnline
-                ? 'Device is offline'
-                : !isOn
-                ? 'Turn on the washer to select program'
-                : isGuarded
-                ? 'Pause cycle to change wash program'
-                : prog}"
-              @click=${() =>
-                this._selectOption(
-                  entities.program,
-                  prog,
-                  isOnline,
-                  isOn,
-                  isRunning,
-                  true
-                )}
-            >
-              <span>${prog}</span>
-            </button>
-          `;
-        })}
-      </div>
-
-      <!-- Temperature Selection Bar -->
-      <div class="section-label">Temperature</div>
-      <div class="segmented-bar">
-        ${(tempOptions.length > 0 ? tempOptions : ['Cold', '20°C', '30°C', '40°C', '60°C', '95°C']).map(
-          (temp) => {
-            const isSelected = currentTemp === temp;
-            return html`
-              <button
-                class="segment-btn ${isSelected ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
-                title="${!isOnline
-                  ? 'Device is offline'
-                  : !isOn
-                  ? 'Turn on the washer to adjust temperature'
-                  : temp}"
-                @click=${() =>
-                  this._selectOption(entities.temp, temp, isOnline, isOn, false, false)}
-              >
-                <span>${temp}</span>
-              </button>
-            `;
-          }
-        )}
-      </div>
-
-      <!-- Spin Speed Selection Bar -->
-      <div class="section-label">Spin Speed</div>
-      <div class="segmented-bar">
-        ${(spinOptions.length > 0
-          ? spinOptions
-          : ['No Spin', '400', '600', '800', '1000', '1200', '1400 RPM']
-        ).map((spin) => {
-          const isSelected = currentSpin === spin;
-          const displayLabel = spin.replace(' RPM', '');
-          return html`
-            <button
-              class="segment-btn ${isSelected ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
-              title="${!isOnline
-                ? 'Device is offline'
-                : !isOn
-                ? 'Turn on the washer to adjust spin speed'
-                : spin}"
-              @click=${() =>
-                this._selectOption(entities.spin, spin, isOnline, isOn, false, false)}
-            >
-              <span>${displayLabel}</span>
-            </button>
-          `;
-        })}
-      </div>
-
-      <!-- Auxiliary Chips (Child Lock, Delay Start, Door) -->
-      <div class="chips-row">
-        <button
-          class="chip-btn ${isChildLockActive ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
+      <!-- Wash Settings Tiles (Program, Temp, Spin, Delay) -->
+      <div class="setting-tiles">
+        <!-- Program Tile -->
+        <div
+          class="setting-tile ${this._openPanel === 'program' ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
           title="${!isOnline
             ? 'Device is offline'
             : !isOn
-            ? 'Turn on the washer to toggle child lock'
-            : 'Toggle Child Lock'}"
-          @click=${() => this._toggleChildLock(entities.childLock, isOnline, isOn)}
+            ? 'Turn on the washer to select program'
+            : isRunning
+            ? 'Pause cycle to change wash program'
+            : 'Select wash program'}"
+          @click=${() => {
+            if (!isOnline) {
+              this._showToast('Device is offline');
+            } else if (!isOn) {
+              this._showToast('Turn on the washer to select program');
+            } else if (isRunning) {
+              this._showToast('Pause cycle to change wash program');
+            } else {
+              this._openPanel = this._openPanel === 'program' ? null : 'program';
+            }
+          }}
         >
-          <ha-icon icon="${isChildLockActive ? 'mdi:account-lock' : 'mdi:account-lock-open-outline'}"></ha-icon>
-          <span>Child Lock ${isChildLockActive ? 'On' : 'Off'}</span>
-        </button>
+          <div class="setting-tile-label">
+            <ha-icon icon="mdi:format-list-bulleted-type"></ha-icon>
+            <span>Program</span>
+          </div>
+          <div class="setting-tile-value-row">
+            <span class="setting-tile-value">${currentProgram || 'Default'}</span>
+            <ha-icon class="setting-tile-chevron" icon="mdi:chevron-down"></ha-icon>
+          </div>
+        </div>
 
-        ${currentDelay && currentDelay !== 'No Delay'
-          ? html`
-              <div class="chip-btn active">
-                <ha-icon icon="mdi:clock-start"></ha-icon>
-                <span>Delay: ${currentDelay}</span>
-              </div>
-            `
-          : nothing}
+        <!-- Temperature Tile -->
+        <div
+          class="setting-tile ${this._openPanel === 'temp' ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
+          title="${!isOnline
+            ? 'Device is offline'
+            : !isOn
+            ? 'Turn on the washer to adjust temperature'
+            : 'Select water temperature'}"
+          @click=${() => {
+            if (!isOnline) {
+              this._showToast('Device is offline');
+            } else if (!isOn) {
+              this._showToast('Turn on the washer to adjust temperature');
+            } else {
+              this._openPanel = this._openPanel === 'temp' ? null : 'temp';
+            }
+          }}
+        >
+          <div class="setting-tile-label">
+            <ha-icon icon="mdi:thermometer-chevron-up"></ha-icon>
+            <span>Temp</span>
+          </div>
+          <div class="setting-tile-value-row">
+            <span class="setting-tile-value">${currentTemp || 'Cold'}</span>
+            <ha-icon class="setting-tile-chevron" icon="mdi:chevron-down"></ha-icon>
+          </div>
+        </div>
 
-        <div class="chip-btn ${isDoorLocked ? 'active' : ''}">
-          <ha-icon icon="${isDoorLocked ? 'mdi:door-closed-lock' : 'mdi:door-open'}"></ha-icon>
-          <span>${isDoorLocked ? 'Door Locked' : 'Door Unlocked'}</span>
+        <!-- Spin Speed Tile -->
+        <div
+          class="setting-tile ${this._openPanel === 'spin' ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
+          title="${!isOnline
+            ? 'Device is offline'
+            : !isOn
+            ? 'Turn on the washer to adjust spin speed'
+            : 'Select spin speed'}"
+          @click=${() => {
+            if (!isOnline) {
+              this._showToast('Device is offline');
+            } else if (!isOn) {
+              this._showToast('Turn on the washer to adjust spin speed');
+            } else {
+              this._openPanel = this._openPanel === 'spin' ? null : 'spin';
+            }
+          }}
+        >
+          <div class="setting-tile-label">
+            <ha-icon icon="mdi:speedometer"></ha-icon>
+            <span>Spin</span>
+          </div>
+          <div class="setting-tile-value-row">
+            <span class="setting-tile-value">${currentSpin || 'No Spin'}</span>
+            <ha-icon class="setting-tile-chevron" icon="mdi:chevron-down"></ha-icon>
+          </div>
+        </div>
+
+        <!-- Delay Start Tile -->
+        <div
+          class="setting-tile ${this._openPanel === 'delay' ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
+          title="${!isOnline
+            ? 'Device is offline'
+            : !isOn
+            ? 'Turn on the washer to set delay start'
+            : isRunning
+            ? 'Cannot set delay while cycle is running'
+            : 'Select delay start'}"
+          @click=${() => {
+            if (!isOnline) {
+              this._showToast('Device is offline');
+            } else if (!isOn) {
+              this._showToast('Turn on the washer to set delay start');
+            } else if (isRunning) {
+              this._showToast('Cannot set delay while cycle is running');
+            } else {
+              this._openPanel = this._openPanel === 'delay' ? null : 'delay';
+            }
+          }}
+        >
+          <div class="setting-tile-label">
+            <ha-icon icon="mdi:timer-outline"></ha-icon>
+            <span>Delay</span>
+          </div>
+          <div class="setting-tile-value-row">
+            <span class="setting-tile-value">${currentDelay || 'No Delay'}</span>
+            <ha-icon class="setting-tile-chevron" icon="mdi:chevron-down"></ha-icon>
+          </div>
         </div>
       </div>
+
+      <!-- Expandable Options Picker Panel -->
+      ${this._openPanel === 'program'
+        ? html`
+            <div class="picker-panel">
+              ${(programOptions.length > 0
+                ? programOptions
+                : ['Mix / Daily', 'Cotton', 'Express 15', 'Tub Clean']
+              ).map((prog) => {
+                const isSelected = currentProgram === prog;
+                return html`
+                  <button
+                    class="picker-opt ${isSelected ? 'sel' : ''}"
+                    @click=${() => {
+                      this._selectOption(
+                        entities.program,
+                        prog,
+                        isOnline,
+                        isOn,
+                        isRunning,
+                        true
+                      );
+                      this._openPanel = null;
+                    }}
+                  >
+                    ${prog}
+                  </button>
+                `;
+              })}
+            </div>
+          `
+        : nothing}
+
+      ${this._openPanel === 'temp'
+        ? html`
+            <div class="picker-panel">
+              ${(tempOptions.length > 0
+                ? tempOptions
+                : ['Cold', '20°C', '30°C', '40°C', '60°C', '95°C']
+              ).map((temp) => {
+                const isSelected = currentTemp === temp;
+                return html`
+                  <button
+                    class="picker-opt ${isSelected ? 'sel' : ''}"
+                    @click=${() => {
+                      this._selectOption(entities.temp, temp, isOnline, isOn, false, false);
+                      this._openPanel = null;
+                    }}
+                  >
+                    ${temp}
+                  </button>
+                `;
+              })}
+            </div>
+          `
+        : nothing}
+
+      ${this._openPanel === 'spin'
+        ? html`
+            <div class="picker-panel">
+              ${(spinOptions.length > 0
+                ? spinOptions
+                : ['No Spin', '400', '600', '800', '1000', '1200', '1400 RPM']
+              ).map((spin) => {
+                const isSelected = currentSpin === spin;
+                return html`
+                  <button
+                    class="picker-opt ${isSelected ? 'sel' : ''}"
+                    @click=${() => {
+                      this._selectOption(entities.spin, spin, isOnline, isOn, false, false);
+                      this._openPanel = null;
+                    }}
+                  >
+                    ${spin}
+                  </button>
+                `;
+              })}
+            </div>
+          `
+        : nothing}
+
+      ${this._openPanel === 'delay'
+        ? html`
+            <div class="picker-panel">
+              ${(delayOptions.length > 0
+                ? delayOptions
+                : ['No Delay', '30 min', '1 hr', '2 hr', '4 hr', '8 hr', '12 hr', '24 hr']
+              ).map((delay) => {
+                const isSelected = currentDelay === delay;
+                return html`
+                  <button
+                    class="picker-opt ${isSelected ? 'sel' : ''}"
+                    @click=${() => {
+                      this._selectOption(
+                        entities.delay,
+                        delay,
+                        isOnline,
+                        isOn,
+                        isRunning,
+                        true
+                      );
+                      this._openPanel = null;
+                    }}
+                  >
+                    ${delay}
+                  </button>
+                `;
+              })}
+            </div>
+          `
+        : nothing}
     `;
   }
 }
