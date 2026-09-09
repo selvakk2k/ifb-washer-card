@@ -1087,19 +1087,6 @@ export class IFBWasherCard extends LitElement {
             <span class="footer-dot ${isDoorLocked ? 'red' : 'green'}"></span>
             <span>${isDoorLocked ? 'Door Locked' : 'Door Unlocked'}</span>
           </div>
-          •
-          <div
-            class="footer-item interactive"
-            title="${!isOnline
-              ? 'Device is offline'
-              : !isOn
-              ? 'Turn on the washer to toggle child lock'
-              : 'Toggle Child Lock'}"
-            @click=${() => this._toggleChildLock(entities.childLock, isOnline, isOn)}
-          >
-            <ha-icon icon="${isChildLockActive ? 'mdi:account-lock' : 'mdi:account-lock-open-outline'}"></ha-icon>
-            <span>Child Lock ${isChildLockActive ? 'On' : 'Off'}</span>
-          </div>
           ${tubTemp > 0
             ? html`
                 •
@@ -1507,12 +1494,10 @@ export class IFBWasherCard extends LitElement {
                 ${isOn && phaseDisplay
                   ? html`<div class="porthole-phase">${phaseDisplay}</div>`
                   : nothing}
-                ${isOn && (motorRpm > 0 || tubTemp > 0)
+                ${isOn && isRunning && motorRpm > 0
                   ? html`
                       <div class="porthole-submetrics">
-                        ${motorRpm > 0 ? `${motorRpm} RPM` : ''}
-                        ${motorRpm > 0 && tubTemp > 0 ? ' • ' : ''}
-                        ${tubTemp > 0 ? `${tubTemp}°C` : ''}
+                        ${motorRpm} RPM
                       </div>
                     `
                   : nothing}
@@ -1870,19 +1855,6 @@ export class IFBWasherCard extends LitElement {
             <span class="footer-dot ${isDoorLocked ? 'red' : 'green'}"></span>
             <span>${isDoorLocked ? 'Door Locked' : 'Door Unlocked'}</span>
           </div>
-          •
-          <div
-            class="footer-item interactive"
-            title="${!isOnline
-              ? 'Device is offline'
-              : !isOn
-              ? 'Turn on the washer to toggle child lock'
-              : 'Toggle Child Lock'}"
-            @click=${() => this._toggleChildLock(entities.childLock, isOnline, isOn)}
-          >
-            <ha-icon icon="${isChildLockActive ? 'mdi:account-lock' : 'mdi:account-lock-open-outline'}"></ha-icon>
-            <span>Child Lock ${isChildLockActive ? 'On' : 'Off'}</span>
-          </div>
           ${tubTemp > 0
             ? html`
                 •
@@ -1967,6 +1939,8 @@ export class IFBWasherCard extends LitElement {
       ? 'Off'
       : isComplete
       ? 'Done'
+      : nominalDuration > 0
+      ? `${nominalDuration} min`
       : 'Standby';
 
     const phaseDisplay = !isOn
@@ -2037,12 +2011,10 @@ export class IFBWasherCard extends LitElement {
               ${isOn && phaseDisplay
                 ? html`<div class="porthole-phase">${phaseDisplay}</div>`
                 : nothing}
-              ${isOn && (motorRpm > 0 || tubTemp > 0)
+              ${isOn && isRunning && motorRpm > 0
                 ? html`
                     <div class="porthole-submetrics">
-                      ${motorRpm > 0 ? `${motorRpm} RPM` : ''}
-                      ${motorRpm > 0 && tubTemp > 0 ? ' • ' : ''}
-                      ${tubTemp > 0 ? `${tubTemp}°C` : ''}
+                      ${motorRpm} RPM
                     </div>
                   `
                 : nothing}

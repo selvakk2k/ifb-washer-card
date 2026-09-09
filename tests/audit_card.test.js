@@ -125,12 +125,11 @@ check(
   cardFile.includes('mdi:timer-outline')
 );
 
-// 12. Telemetry Footer Tub Label & Child Lock
+// 12. Telemetry Footer Tub Label & Child Lock Flank
 check(
-  'Telemetry footer explicitly labels Tub temperature and includes interactive Child Lock',
+  'Telemetry footer explicitly labels Tub temperature and card includes interactive Child Lock flank',
   cardFile.includes('Tub: ${tubTemp}°C') &&
-  cardFile.includes('this._toggleChildLock(entities.childLock') &&
-  stylesFile.includes('.footer-item.interactive')
+  cardFile.includes('this._toggleChildLock(entities.childLock')
 );
 
 // 13. Visual Editor Companion & Sensor Selectors
