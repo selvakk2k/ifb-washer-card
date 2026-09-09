@@ -5,9 +5,11 @@ import { IFBWasherCardConfig } from './types';
 import { styles } from './styles';
 
 // Program Capabilities per Official Wash Guide Map (Pages 57-67)
+// Program Capabilities per Official Wash Guide Map (Pages 57-67) & Dry Mode Gating
 const PROGRAM_CAPABILITIES: Record<string, {
   allowedTemps?: string[];
   allowedSpins?: string[];
+  allowedDryModes?: string[];
   supportsDry?: boolean;
   supportsSteam?: boolean;
   supportsPrewash?: boolean;
@@ -23,6 +25,10 @@ const PROGRAM_CAPABILITIES: Record<string, {
   'Wash + Dry 2Hr': {
     allowedTemps: ['Cold', '30°C', '40°C'],
     allowedSpins: ['400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM'],
+    allowedDryModes: [
+      'No Dry', 'Cupboard Dry', 'Iron Dry', 'Eco Dry', 'Gentle Dry',
+      '30 Minutes', '1 Hour', '1 Hour 30 Minutes', '2 Hours',
+    ],
     supportsDry: true,
     supportsSteam: false,
     supportsPrewash: false,
@@ -31,6 +37,12 @@ const PROGRAM_CAPABILITIES: Record<string, {
   'Wash + Dry 4Hr': {
     allowedTemps: ['Cold', '30°C', '40°C'],
     allowedSpins: ['400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM', '1400 RPM'],
+    allowedDryModes: [
+      'No Dry', 'Cupboard Dry', 'Iron Dry', 'Eco Dry', 'Gentle Dry',
+      '30 Minutes', '1 Hour', '1 Hour 30 Minutes', '2 Hours', '2 Hours 30 Minutes',
+      '3 Hours', '3 Hours 30 Minutes', '4 Hours', '4 Hours 30 Minutes',
+      '5 Hours', '5 Hours 30 Minutes', '6 Hours',
+    ],
     supportsDry: true,
     supportsSteam: false,
     supportsPrewash: false,
@@ -39,6 +51,11 @@ const PROGRAM_CAPABILITIES: Record<string, {
   'Steam & Dry': {
     allowedTemps: ['Cold', '30°C', '40°C'],
     allowedSpins: ['400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM', '1400 RPM'],
+    allowedDryModes: [
+      'No Dry', 'Cupboard Dry', 'Iron Dry', 'Eco Dry', 'Gentle Dry',
+      '30 Minutes', '1 Hour', '1 Hour 30 Minutes', '2 Hours', '2 Hours 30 Minutes',
+      '3 Hours', '3 Hours 30 Minutes', '4 Hours',
+    ],
     supportsDry: true,
     supportsSteam: true,
     supportsPrewash: false,
@@ -47,6 +64,7 @@ const PROGRAM_CAPABILITIES: Record<string, {
   'Refresh': {
     allowedTemps: ['Cold'],
     allowedSpins: ['No Spin'],
+    allowedDryModes: ['No Dry'],
     supportsDry: false,
     supportsSteam: true,
     supportsPrewash: false,
@@ -59,13 +77,15 @@ const PROGRAM_CAPABILITIES: Record<string, {
   'Power Steam': {
     allowedTemps: ['Cold', '30°C', '40°C'],
     allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM'],
+    allowedDryModes: ['No Dry'],
     supportsDry: false,
     supportsSteam: true,
   },
   'CradleWash®': {
     allowedTemps: ['Cold', '30°C', '40°C'],
     allowedSpins: ['No Spin', '400 RPM', '600 RPM'],
-    supportsDry: false,
+    allowedDryModes: ['No Dry', 'Cradle Dry', '30 Minutes', '1 Hour'],
+    supportsDry: true,
     supportsSteam: false,
     supportsPrewash: false,
     supportsSoak: false,
@@ -74,7 +94,8 @@ const PROGRAM_CAPABILITIES: Record<string, {
   'Wool': {
     allowedTemps: ['Cold', '30°C', '40°C'],
     allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM'],
-    supportsDry: false,
+    allowedDryModes: ['No Dry', 'Gentle Dry', '30 Minutes', '1 Hour'],
+    supportsDry: true,
     supportsSteam: false,
     supportsPrewash: false,
     supportsSoak: false,
@@ -83,39 +104,66 @@ const PROGRAM_CAPABILITIES: Record<string, {
   'Bulky': {
     allowedTemps: ['Cold', '40°C', '60°C'],
     allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM'],
-    supportsDry: false,
+    allowedDryModes: [
+      'No Dry', 'Cupboard Dry',
+      '30 Minutes', '1 Hour', '1 Hour 30 Minutes', '2 Hours', '2 Hours 30 Minutes',
+      '3 Hours', '3 Hours 30 Minutes', '4 Hours',
+    ],
+    supportsDry: true,
   },
   'Baby Wear': {
     allowedTemps: ['Cold', '40°C', '60°C'],
     allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM'],
-    supportsDry: false,
+    allowedDryModes: [
+      'No Dry', 'Cupboard Dry', 'Iron Dry',
+      '30 Minutes', '1 Hour', '1 Hour 30 Minutes', '2 Hours',
+    ],
+    supportsDry: true,
     supportsSteam: true,
   },
   'Anti-Allergen': {
     allowedTemps: ['40°C', '60°C', '95°C'],
     allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM', '1000 RPM'],
-    supportsDry: false,
+    allowedDryModes: [
+      'No Dry', 'Cupboard Dry', 'Iron Dry',
+      '30 Minutes', '1 Hour', '1 Hour 30 Minutes', '2 Hours', '2 Hours 30 Minutes', '3 Hours',
+    ],
+    supportsDry: true,
     supportsSteam: true,
   },
   'Synthetic': {
     allowedTemps: ['Cold', '30°C', '40°C', '60°C'],
     allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM'],
-    supportsDry: false,
+    allowedDryModes: [
+      'No Dry', 'Cupboard Dry', 'Iron Dry', 'Gentle Dry',
+      '30 Minutes', '1 Hour', '1 Hour 30 Minutes', '2 Hours',
+    ],
+    supportsDry: true,
   },
   'Cotton': {
     allowedTemps: ['Cold', '30°C', '40°C', '60°C', '95°C'],
     allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM', '1400 RPM'],
-    supportsDry: false,
+    allowedDryModes: [
+      'No Dry', 'Cupboard Dry', 'Iron Dry', 'Eco Dry',
+      '30 Minutes', '1 Hour', '1 Hour 30 Minutes', '2 Hours', '2 Hours 30 Minutes',
+      '3 Hours', '3 Hours 30 Minutes', '4 Hours',
+    ],
+    supportsDry: true,
   },
   'Mix / Daily': {
     allowedTemps: ['Cold', '30°C', '40°C', '60°C'],
     allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM'],
-    supportsDry: false,
+    allowedDryModes: [
+      'No Dry', 'Cupboard Dry', 'Iron Dry', 'Eco Dry',
+      '30 Minutes', '1 Hour', '1 Hour 30 Minutes', '2 Hours', '2 Hours 30 Minutes', '3 Hours',
+    ],
+    supportsDry: true,
   },
   'Express 15\'': {
     allowedTemps: ['Cold', '30°C', '40°C'],
     allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM'],
-    supportsDry: false,
+    allowedDryModes: ['No Dry', '30 Minutes'],
+    supportsDry: true,
     supportsPrewash: false,
     supportsSoak: false,
     supportsTimeSaver: false,
@@ -123,6 +171,7 @@ const PROGRAM_CAPABILITIES: Record<string, {
   'Tub Clean': {
     allowedTemps: ['Cold', '60°C', '95°C'],
     allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM'],
+    allowedDryModes: ['No Dry'],
     supportsDry: false,
     supportsSteam: false,
     supportsPrewash: false,
@@ -135,6 +184,114 @@ const PROGRAM_CAPABILITIES: Record<string, {
     supportsAroma: false,
     supportsAntiCrease: false,
   },
+  'Spin Dry / Drain': {
+    allowedTemps: ['Cold'],
+    allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM', '1400 RPM'],
+    allowedDryModes: ['No Dry'],
+    supportsDry: false,
+    supportsSteam: false,
+    supportsPrewash: false,
+    supportsSoak: false,
+    supportsTimeSaver: false,
+    supportsExtraRinse: false,
+    supportsHotRinse: false,
+    supportsRinseHold: false,
+    supportsEco: false,
+    supportsAroma: false,
+    supportsAntiCrease: false,
+  },
+  'Rinse + Spin': {
+    allowedTemps: ['Cold'],
+    allowedSpins: ['No Spin', '400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM', '1400 RPM'],
+    allowedDryModes: ['No Dry'],
+    supportsDry: false,
+    supportsSteam: false,
+    supportsPrewash: false,
+    supportsSoak: false,
+    supportsTimeSaver: false,
+    supportsExtraRinse: true,
+    supportsHotRinse: false,
+    supportsRinseHold: true,
+    supportsEco: false,
+    supportsAroma: true,
+    supportsAntiCrease: true,
+  },
+};
+
+// Nominal cycle run times (minutes) from Official Wash Guide Map
+const PROGRAM_DURATIONS: Record<string, number> = {
+  'Mix / Daily': 72,
+  'Cotton': 163,
+  'Anti-Allergen': 155,
+  'Baby Wear': 148,
+  'Synthetic': 89,
+  'Bulky': 85,
+  'Wool': 50,
+  'CradleWash®': 48,
+  'Express 15\'': 15,
+  'Power Steam': 105,
+  'Refresh': 30,
+  'Steam & Dry': 210,
+  'Wash + Dry 4Hr': 240,
+  'Wash + Dry 2Hr': 120,
+  'Tub Clean': 90,
+  'Spin Dry / Drain': 16,
+  'Rinse + Spin': 28,
+};
+
+// Plain English descriptions for programs, modifiers, and dry modes
+const HELP_DESCRIPTIONS: Record<string, string> = {
+  // Programs
+  'Mix / Daily': 'Everyday mixed colored cotton and synthetic garments (up to 4 kg). Nominal run time: 72 min.',
+  'Cotton': 'Heavily soiled bedsheets, towels, jeans, shirts, whites, and colorfast linens. Nominal run time: 163 min.',
+  'Anti-Allergen': 'Hot hygiene wash designed to neutralize house dust mites, pollen, pet dander, and bacterial spores. Nominal run time: 155 min.',
+  'Baby Wear': 'Delicate yet hygienic wash for infant wear and soft fabrics. Nominal run time: 148 min.',
+  'Synthetic': 'Non-iron garments made of polyester, nylon, acrylic, or blended synthetics. Nominal run time: 89 min.',
+  'Bulky': 'Bulky single-item loads such as lightweight quilts, bedspreads, blankets, curtains, and bathrobes. Nominal run time: 85 min.',
+  'Wool': 'Pure new wool garments labelled machine-washable. Nominal run time: 50 min.',
+  'CradleWash®': 'Ultra-gentle cradle wash for silks, chiffons, delicate lace, and hand-wash-only garments. Nominal run time: 48 min.',
+  'Express 15\'': 'Rapid refresh cycle for lightly soiled workout clothes or just-worn shirts (up to 1.5 kg). Nominal run time: 15 min.',
+  'Power Steam': 'Intensive wash with deep steam infusion to sanitize and loosen tough grime. Nominal run time: 105 min.',
+  'Refresh': 'Non-washing steam refresh cycle to eliminate stale wardrobe odors, smoke, and creases without water wash. Nominal run time: 30 min.',
+  'Steam & Dry': 'Continuous wash, steam deodorization, and condensing drying cycle. Nominal run time: 210 min.',
+  'Wash + Dry 4Hr': 'Complete automatic wash and high-capacity condensation dry cycle. Nominal run time: 240 min.',
+  'Wash + Dry 2Hr': 'Fast turnaround wash and dry cycle for small loads (up to 2 kg). Nominal run time: 120 min.',
+  'Tub Clean': 'Special 90°C high-heat sanitation cycle to sterilize drum and flush detergent residue. Nominal run time: 90 min.',
+  'Spin Dry / Drain': 'Drain machine water and spin dry without wash or rinse. Nominal run time: 16 min.',
+  'Rinse + Spin': 'Rinse garments with clean water and high-speed spin without washing. Nominal run time: 28 min.',
+
+  // Modifiers
+  'Pre-wash': 'Adds a preliminary soak and pre-rinse before the main wash cycle to loosen heavy surface dirt.',
+  'Soak': 'Introduces a standing drum soak with detergent water before agitation starts.',
+  'Steam': 'Injects pure steam into the drum during the cycle to sanitize fabrics and soften creases.',
+  'Time Saver': 'Reduces overall cycle time by accelerating agitation and heating for lightly soiled garments.',
+  'Eco': 'Optimizes energy and water consumption by slightly lowering temperature and extending gentle mechanical action.',
+  'Extra Rinse': 'Adds additional freshwater rinse cycles (up to 3) to thoroughly purge detergent residue.',
+  'Hot Rinse': 'Executes final rinse with warm water to relax fabric fibers and accelerate subsequent spin extraction.',
+  'Rinse Hold': 'Holds laundry in final rinse water without draining or spinning to prevent creasing until ready.',
+  'Aroma': 'Dispenses fabric softener at the ideal thermal window to maximize fresh scent retention.',
+  'Anti-Crease': 'Intermittently rotates drum after cycle completes to keep clothes unwrinkled until unloaded.',
+  'Child Lock': 'Locks physical machine control panel buttons and dial to prevent accidental interference.',
+
+  // Dry Modes
+  'No Dry': 'Washing only; condensation heater and dryer fan remain off.',
+  'Cupboard Dry': 'Dries garments completely so they can be folded and stored directly into wardrobes.',
+  'Iron Dry': 'Leaves a faint trace of residual moisture in fabrics for effortless steam ironing.',
+  'Eco Dry': 'Low-energy condensing drying cycle using lower thermal temperatures for energy efficiency.',
+  'Gentle Dry': 'Low-temperature gentle tumbling for temperature-sensitive delicate fabrics and synthetics.',
+  'Cradle Dry': 'Ultra-gentle dry cycle exclusively calibrated for silks, wool, and delicate garments.',
+  '30 Minutes': 'Timed condensation drying for 30 minutes.',
+  '1 Hour': 'Timed condensation drying for 1 hour.',
+  '1 Hour 30 Minutes': 'Timed condensation drying for 1 hour 30 minutes.',
+  '2 Hours': 'Timed condensation drying for 2 hours.',
+  '2 Hours 30 Minutes': 'Timed condensation drying for 2 hours 30 minutes.',
+  '3 Hours': 'Timed condensation drying for 3 hours.',
+  '3 Hours 30 Minutes': 'Timed condensation drying for 3 hours 30 minutes.',
+  '4 Hours': 'Timed condensation drying for 4 hours.',
+  '4 Hours 30 Minutes': 'Timed condensation drying for 4 hours 30 minutes.',
+  '5 Hours': 'Timed condensation drying for 5 hours.',
+  '5 Hours 30 Minutes': 'Timed condensation drying for 5 hours 30 minutes.',
+  '6 Hours': 'Timed condensation drying for 6 hours.',
 };
 
 export class IFBWasherCard extends LitElement {
@@ -143,6 +300,27 @@ export class IFBWasherCard extends LitElement {
   @state() private _expanded = false;
   @state() private _openPanel: 'program' | 'temp' | 'spin' | 'delay' | 'extra_rinse' | 'dry_mode' | null = null;
   @state() private _ghDropdown: 'program' | 'spin' | 'temp' | 'delay' | 'extra_rinse' | 'dry_mode' | null = null;
+
+  private _longPressTimer: any = null;
+  private _isLongPress = false;
+
+  private _handleTouchStart(text: string) {
+    this._isLongPress = false;
+    this._longPressTimer = setTimeout(() => {
+      this._isLongPress = true;
+      this._showToast(text);
+      if (typeof navigator !== 'undefined' && (navigator as any).vibrate) {
+        (navigator as any).vibrate(50);
+      }
+    }, 500);
+  }
+
+  private _handleTouchEnd() {
+    if (this._longPressTimer) {
+      clearTimeout(this._longPressTimer);
+      this._longPressTimer = null;
+    }
+  }
 
   private _handleWindowClick = (e: MouseEvent) => {
     const path = e.composedPath();
@@ -715,7 +893,8 @@ export class IFBWasherCard extends LitElement {
     const staticCaps = PROGRAM_CAPABILITIES[currentProgram] || {};
     const allowedTemps: string[] | undefined = progCaps.allowed_temps || staticCaps.allowedTemps;
     const allowedSpins: string[] | undefined = progCaps.allowed_spins || staticCaps.allowedSpins;
-    const supportsDry: boolean = progCaps.supports_dry ?? staticCaps.supportsDry ?? true;
+    const allowedDryModes: string[] | undefined = progCaps.allowed_dry_modes || staticCaps.allowedDryModes;
+    const supportsDry: boolean = progCaps.supports_dry ?? (allowedDryModes ? allowedDryModes.length > 1 : staticCaps.supportsDry ?? true);
     const supportsSteam: boolean = progCaps.supports_steam ?? staticCaps.supportsSteam ?? true;
     const supportsPrewash: boolean = progCaps.supports_prewash ?? staticCaps.supportsPrewash ?? true;
     const supportsSoak: boolean = progCaps.supports_soak ?? staticCaps.supportsSoak ?? true;
@@ -727,6 +906,11 @@ export class IFBWasherCard extends LitElement {
     const supportsEco: boolean = progCaps.supports_eco ?? staticCaps.supportsEco ?? true;
     const supportsAroma: boolean = progCaps.supports_aroma ?? staticCaps.supportsAroma ?? true;
     const supportsAntiCrease: boolean = progCaps.supports_anti_crease ?? staticCaps.supportsAntiCrease ?? true;
+
+    // Gated dry mode options
+    const effectiveDryModeOptions: string[] = (allowedDryModes && allowedDryModes.length > 0)
+      ? allowedDryModes
+      : (dryModeOptions.length > 0 ? dryModeOptions : ['No Dry']);
 
     // Modifiers list
     const modifiers = [
@@ -810,7 +994,7 @@ export class IFBWasherCard extends LitElement {
         extraRinseOptions,
         supportsExtraRinse,
         currentDryMode,
-        dryModeOptions,
+        effectiveDryModeOptions,
         supportsDry,
         modifiers
       );
@@ -888,7 +1072,7 @@ export class IFBWasherCard extends LitElement {
           extraRinseOptions,
           supportsExtraRinse,
           currentDryMode,
-          dryModeOptions,
+          effectiveDryModeOptions,
           supportsDry,
           modifiers
         )}
@@ -1041,6 +1225,71 @@ export class IFBWasherCard extends LitElement {
   }
 
   /* ── Cycle Modifiers Rendering ── */
+  private _renderModifierChip(
+    mod: {
+      key: string;
+      label: string;
+      icon: string;
+      entityId?: string;
+      supported: boolean;
+      blockedReason?: string;
+    },
+    isOnline: boolean,
+    isOn: boolean,
+    isRunning: boolean
+  ) {
+    const stateObj = mod.entityId ? this.hass.states[mod.entityId] : undefined;
+    const isActive = stateObj?.state === 'on';
+    const isSupported = mod.supported;
+    const isBlocked = !!mod.blockedReason;
+    const isDisabled = !isOnline || !isOn || !isSupported || isBlocked || isRunning;
+
+    const desc = HELP_DESCRIPTIONS[mod.label] || HELP_DESCRIPTIONS[mod.key] || '';
+    let tooltip = mod.label;
+    if (desc) tooltip += ` — ${desc}`;
+    if (!isOnline) tooltip = 'Device is offline';
+    else if (!isOn) tooltip = 'Turn on washer to toggle modifiers';
+    else if (isRunning) tooltip = 'Pause cycle to toggle modifiers';
+    else if (isBlocked) tooltip = mod.blockedReason!;
+    else if (!isSupported) tooltip = `${mod.label} is not supported by current program`;
+
+    const helpMsg = desc || tooltip;
+
+    return html`
+      <button
+        class="modifier-chip ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}"
+        title="${tooltip}"
+        @touchstart=${() => this._handleTouchStart(helpMsg)}
+        @touchend=${() => this._handleTouchEnd()}
+        @touchcancel=${() => this._handleTouchEnd()}
+        @click=${(e: Event) => {
+          if (this._isLongPress) {
+            this._isLongPress = false;
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+          if (!isOnline) {
+            this._showToast('Device is offline');
+          } else if (!isOn) {
+            this._showToast('Turn on washer to toggle modifiers');
+          } else if (isRunning) {
+            this._showToast('Pause cycle to toggle modifiers');
+          } else if (isBlocked) {
+            this._showToast(mod.blockedReason!);
+          } else if (!isSupported) {
+            this._showToast(`${mod.label} is not supported by current program`);
+          } else if (mod.entityId) {
+            this._toggleSwitch(mod.entityId, isOnline, isOn);
+          }
+        }}
+      >
+        <ha-icon icon="${mod.icon}"></ha-icon>
+        <span>${mod.label}</span>
+      </button>
+    `;
+  }
+
   private _renderModifiers(
     modifiers: Array<{
       key: string;
@@ -1057,51 +1306,36 @@ export class IFBWasherCard extends LitElement {
     const activeModifiers = modifiers.filter((m) => !!m.entityId);
     if (activeModifiers.length === 0) return nothing;
 
+    const washKeys = ['prewash', 'soak', 'steam', 'time_saver', 'eco'];
+    const washModifiers = activeModifiers.filter((m) => washKeys.includes(m.key));
+    const finishingModifiers = activeModifiers.filter((m) => !washKeys.includes(m.key));
+
     return html`
       <div class="modifiers-section">
-        <div class="modifiers-title">Cycle Modifiers</div>
-        <div class="modifiers-scroll">
-          ${activeModifiers.map((mod) => {
-            const stateObj = mod.entityId ? this.hass.states[mod.entityId] : undefined;
-            const isActive = stateObj?.state === 'on';
-            const isSupported = mod.supported;
-            const isBlocked = !!mod.blockedReason;
-            const isDisabled = !isOnline || !isOn || !isSupported || isBlocked || isRunning;
-
-            let tooltip = mod.label;
-            if (!isOnline) tooltip = 'Device is offline';
-            else if (!isOn) tooltip = 'Turn on washer to toggle modifiers';
-            else if (isRunning) tooltip = 'Pause cycle to toggle modifiers';
-            else if (isBlocked) tooltip = mod.blockedReason!;
-            else if (!isSupported) tooltip = `${mod.label} is not supported by current program`;
-            else tooltip = `${mod.label}: ${isActive ? 'On' : 'Off'}`;
-
-            return html`
-              <button
-                class="modifier-chip ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}"
-                title="${tooltip}"
-                @click=${() => {
-                  if (!isOnline) {
-                    this._showToast('Device is offline');
-                  } else if (!isOn) {
-                    this._showToast('Turn on washer to toggle modifiers');
-                  } else if (isRunning) {
-                    this._showToast('Pause cycle to toggle modifiers');
-                  } else if (isBlocked) {
-                    this._showToast(mod.blockedReason!);
-                  } else if (!isSupported) {
-                    this._showToast(`${mod.label} is not supported by current program`);
-                  } else if (mod.entityId) {
-                    this._toggleSwitch(mod.entityId, isOnline, isOn);
-                  }
-                }}
-              >
-                <ha-icon icon="${mod.icon}"></ha-icon>
-                <span>${mod.label}</span>
-              </button>
-            `;
-          })}
-        </div>
+        ${washModifiers.length > 0
+          ? html`
+              <div class="modifiers-group">
+                <div class="modifiers-subheading">Wash Options</div>
+                <div class="modifiers-grid">
+                  ${washModifiers.map((mod) =>
+                    this._renderModifierChip(mod, isOnline, isOn, isRunning)
+                  )}
+                </div>
+              </div>
+            `
+          : nothing}
+        ${finishingModifiers.length > 0
+          ? html`
+              <div class="modifiers-group">
+                <div class="modifiers-subheading">Finishing Options</div>
+                <div class="modifiers-grid">
+                  ${finishingModifiers.map((mod) =>
+                    this._renderModifierChip(mod, isOnline, isOn, isRunning)
+                  )}
+                </div>
+              </div>
+            `
+          : nothing}
       </div>
     `;
   }
@@ -1488,7 +1722,7 @@ export class IFBWasherCard extends LitElement {
                       }
                     }}
                   >
-                    <span>Dry: ${currentDryMode || 'Off'}</span>
+                    <span>Dry: ${currentDryMode || 'No Dry'}</span>
                     <ha-icon icon="mdi:chevron-down"></ha-icon>
                   </button>
                   ${this._ghDropdown === 'dry_mode'
@@ -1496,20 +1730,24 @@ export class IFBWasherCard extends LitElement {
                         <div class="gh-dropdown-menu">
                           ${(dryModeOptions.length > 0
                             ? dryModeOptions
-                            : ['Off', 'Cupboard Dry', 'Iron Dry', 'Time Dry (30m)', 'Time Dry (60m)', 'Time Dry (120m)']
+                            : ['No Dry', 'Cupboard Dry', 'Iron Dry', '30 Minutes', '1 Hour', '2 Hours']
                           ).map(
-                            (dm) => html`
-                              <button
-                                class="gh-dropdown-item ${currentDryMode === dm ? 'active' : ''}"
-                                @click=${(e: Event) => {
-                                  e.stopPropagation();
-                                  this._ghDropdown = null;
-                                  this._selectOption(entities.dryMode, dm, isOnline, isOn, isRunning, false);
-                                }}
-                              >
-                                ${dm}
-                              </button>
-                            `
+                            (dm) => {
+                              const dmDesc = HELP_DESCRIPTIONS[dm] || '';
+                              return html`
+                                <button
+                                  class="gh-dropdown-item ${currentDryMode === dm ? 'active' : ''}"
+                                  title="${dmDesc ? `${dm} — ${dmDesc}` : dm}"
+                                  @click=${(e: Event) => {
+                                    e.stopPropagation();
+                                    this._ghDropdown = null;
+                                    this._selectOption(entities.dryMode, dm, isOnline, isOn, isRunning, false);
+                                  }}
+                                >
+                                  ${dm}
+                                </button>
+                              `;
+                            }
                           )}
                         </div>
                       `
@@ -1612,10 +1850,50 @@ export class IFBWasherCard extends LitElement {
     }>
   ) {
     const isSpinningFast = motorRpm > 400;
+    const programObj = entities.program ? this.hass.states[entities.program] : undefined;
+    const nominalDuration =
+      (programObj?.attributes?.program_duration as number) ||
+      PROGRAM_DURATIONS[currentProgram] ||
+      0;
+    let runTimeDisplay = '--';
+    if (isRunning) {
+      runTimeDisplay = remMinutes > 0 ? `${remMinutes} min` : 'Running';
+    } else if (nominalDuration > 0) {
+      runTimeDisplay = `${nominalDuration} min`;
+    }
 
     return html`
-      <!-- Porthole & Radial Progress Ring -->
+      <!-- Porthole & Radial Progress Ring with Dial Flanks -->
       <div class="porthole-container">
+        <!-- Left Flank: Child Lock -->
+        <div
+          class="dial-flank child-lock-flank ${isChildLockActive ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
+          title="${!isOnline
+            ? 'Device is offline'
+            : !isOn
+            ? 'Turn on the washer to toggle child lock'
+            : (HELP_DESCRIPTIONS['Child Lock'] || 'Toggle Child Lock')}"
+          @touchstart=${() => this._handleTouchStart(HELP_DESCRIPTIONS['Child Lock'] || 'Locks machine control panel')}
+          @touchend=${() => this._handleTouchEnd()}
+          @touchcancel=${() => this._handleTouchEnd()}
+          @click=${(e: Event) => {
+            if (this._isLongPress) {
+              this._isLongPress = false;
+              e.preventDefault();
+              e.stopPropagation();
+              return;
+            }
+            this._toggleChildLock(entities.childLock, isOnline, isOn);
+          }}
+        >
+          <div class="dial-flank-icon-btn ${isChildLockActive ? 'active' : ''}">
+            <ha-icon icon="${isChildLockActive ? 'mdi:lock' : 'mdi:lock-open-variant-outline'}"></ha-icon>
+          </div>
+          <span class="dial-flank-label">Child Lock</span>
+          <span class="dial-flank-status">${isChildLockActive ? 'Locked' : 'Unlocked'}</span>
+        </div>
+
+        <!-- Center: Porthole Ring Wrapper -->
         <div class="porthole-ring-wrapper">
           <svg class="porthole-svg" viewBox="0 0 164 164">
             <circle class="ring-track" cx="82" cy="82" r="${radius}" />
@@ -1659,6 +1937,18 @@ export class IFBWasherCard extends LitElement {
                 : nothing}
             </div>
           </div>
+        </div>
+
+        <!-- Right Flank: Run Time -->
+        <div
+          class="dial-flank runtime-flank"
+          title="Program run time: ${runTimeDisplay}"
+        >
+          <div class="dial-flank-icon-btn static">
+            <ha-icon icon="mdi:clock-outline"></ha-icon>
+          </div>
+          <span class="dial-flank-label">Run Time</span>
+          <span class="dial-flank-status">${runTimeDisplay}</span>
         </div>
       </div>
 
@@ -1897,7 +2187,7 @@ export class IFBWasherCard extends LitElement {
                   <span>Dry</span>
                 </div>
                 <div class="setting-tile-value-row">
-                  <span class="setting-tile-value">${currentDryMode || 'Off'}</span>
+                  <span class="setting-tile-value">${currentDryMode || 'No Dry'}</span>
                   <ha-icon class="setting-tile-chevron" icon="mdi:chevron-down"></ha-icon>
                 </div>
               </div>
@@ -1911,13 +2201,24 @@ export class IFBWasherCard extends LitElement {
             <div class="picker-panel">
               ${(programOptions.length > 0
                 ? programOptions
-                : ['Mix / Daily', 'Cotton', 'Express 15', 'Tub Clean']
+                : ['Mix / Daily', 'Cotton', 'Express 15\'', 'Tub Clean']
               ).map((prog) => {
                 const isSelected = currentProgram === prog;
+                const progDesc = HELP_DESCRIPTIONS[prog] || '';
                 return html`
                   <button
                     class="picker-opt ${isSelected ? 'sel' : ''}"
-                    @click=${() => {
+                    title="${progDesc ? `${prog} — ${progDesc}` : prog}"
+                    @touchstart=${() => progDesc ? this._handleTouchStart(progDesc) : null}
+                    @touchend=${() => this._handleTouchEnd()}
+                    @touchcancel=${() => this._handleTouchEnd()}
+                    @click=${(e: Event) => {
+                      if (this._isLongPress) {
+                        this._isLongPress = false;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
+                      }
                       this._selectOption(
                         entities.program,
                         prog,
@@ -1966,7 +2267,7 @@ export class IFBWasherCard extends LitElement {
             <div class="picker-panel">
               ${(spinOptions.length > 0
                 ? spinOptions
-                : ['No Spin', '400', '600', '800', '1000', '1200', '1400 RPM']
+                : ['No Spin', '400 RPM', '600 RPM', '800 RPM', '1000 RPM', '1200 RPM', '1400 RPM']
               ).map((spin) => {
                 const isSelected = currentSpin === spin;
                 return html`
@@ -2052,13 +2353,24 @@ export class IFBWasherCard extends LitElement {
             <div class="picker-panel">
               ${(dryModeOptions.length > 0
                 ? dryModeOptions
-                : ['Off', 'Cupboard Dry', 'Iron Dry', 'Time Dry (30m)', 'Time Dry (60m)', 'Time Dry (120m)']
+                : ['No Dry', 'Cupboard Dry', 'Iron Dry', '30 Minutes', '1 Hour', '2 Hours']
               ).map((dm) => {
                 const isSelected = currentDryMode === dm;
+                const dmDesc = HELP_DESCRIPTIONS[dm] || '';
                 return html`
                   <button
                     class="picker-opt ${isSelected ? 'sel' : ''}"
-                    @click=${() => {
+                    title="${dmDesc ? `${dm} — ${dmDesc}` : dm}"
+                    @touchstart=${() => dmDesc ? this._handleTouchStart(dmDesc) : null}
+                    @touchend=${() => this._handleTouchEnd()}
+                    @touchcancel=${() => this._handleTouchEnd()}
+                    @click=${(e: Event) => {
+                      if (this._isLongPress) {
+                        this._isLongPress = false;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
+                      }
                       this._selectOption(
                         entities.dryMode,
                         dm,

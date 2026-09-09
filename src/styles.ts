@@ -162,11 +162,71 @@ export const styles = css`
   /* ── Porthole & Drum Progress Ring ── */
   .porthole-container {
     display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    margin: 12px 0 16px;
+    position: relative;
+    width: 100%;
+  }
+  .dial-flank {
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin: 12px 0 16px;
-    position: relative;
+    gap: 4px;
+    min-width: 68px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+  }
+  .dial-flank.runtime-flank {
+    cursor: default;
+  }
+  .dial-flank.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .dial-flank-icon-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--appliance-border);
+    background: var(--appliance-surface);
+    color: var(--appliance-text-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .dial-flank-icon-btn ha-icon {
+    --mdc-icon-size: 20px;
+  }
+  .dial-flank:hover:not(.disabled):not(.runtime-flank) .dial-flank-icon-btn {
+    background: var(--appliance-surface-hover);
+    color: var(--appliance-text);
+  }
+  .dial-flank-icon-btn.active {
+    background: var(--appliance-accent);
+    color: var(--appliance-on-accent, #ffffff);
+    border-color: var(--appliance-accent);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--appliance-accent) 40%, transparent);
+  }
+  .dial-flank-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--appliance-text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 2px;
+  }
+  .dial-flank-status {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--appliance-text);
+  }
+  .dial-flank.active .dial-flank-status {
+    color: var(--appliance-accent);
   }
   .porthole-ring-wrapper {
     position: relative;
@@ -762,58 +822,59 @@ export const styles = css`
   }
 
   /* ── Modifier Chips Row ── */
+  /* ── Modifier Chips Layout ── */
   .modifiers-section {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
     margin-top: 14px;
   }
-  .modifiers-title {
-    font-size: 0.78rem;
-    font-weight: 600;
+  .modifiers-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .modifiers-subheading {
+    font-size: 0.72rem;
+    font-weight: 700;
     color: var(--appliance-text-2);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
   }
-  .modifiers-scroll {
+  .modifiers-grid {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    scrollbar-width: none;
-  }
-  .modifiers-scroll::-webkit-scrollbar {
-    display: none;
   }
   .modifier-chip {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
-    border-radius: 20px;
+    padding: 7px 12px;
+    border-radius: 14px;
     border: 1px solid var(--appliance-border);
     background: var(--appliance-surface);
     color: var(--appliance-text);
     font-size: 0.8rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     flex-shrink: 0;
   }
   .modifier-chip:hover:not(.disabled) {
     background: var(--appliance-surface-hover);
+    border-color: color-mix(in srgb, var(--appliance-accent) 40%, var(--appliance-border));
   }
-  .modifier-chip.on {
+  .modifier-chip.active {
     background: var(--appliance-active-bg);
     color: var(--appliance-accent);
     border-color: var(--appliance-active-border);
-    box-shadow: 0 0 12px color-mix(in srgb, var(--appliance-accent) 25%, transparent);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--appliance-accent) 25%, transparent);
   }
   .modifier-chip.disabled {
-    opacity: 0.35;
+    opacity: 0.38;
     cursor: not-allowed;
-    background: transparent;
   }
   .modifier-chip ha-icon {
     --mdc-icon-size: 16px;
