@@ -200,40 +200,52 @@ export const styles = css`
     stroke-linecap: round;
     transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
+  .ring-progress.active {
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--appliance-accent) 60%, transparent));
+  }
   .drum-porthole {
     width: 140px;
     height: 140px;
     border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, var(--appliance-surface-hover), var(--appliance-surface));
+    background: var(--appliance-surface);
     border: 1px solid var(--appliance-border);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
-    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.25);
     overflow: hidden;
   }
 
-  /* Drum rotation animation */
-  .drum-rotator {
+  /* Drum rotation baffles - mechanical wash animation without arrows */
+  .drum-baffles {
     position: absolute;
     width: 100%;
     height: 100%;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.12;
     pointer-events: none;
+    opacity: 0.12;
   }
-  .drum-rotator.spinning {
-    animation: drum-spin 2s linear infinite;
+  .drum-baffles.spinning {
+    animation: drum-spin 2.5s linear infinite;
   }
-  .drum-rotator.fast-spin {
-    animation: drum-spin 0.6s linear infinite;
+  .drum-baffles.fast-spin {
+    animation: drum-spin 0.7s linear infinite;
   }
-  .drum-rotator ha-icon {
-    --mdc-icon-size: 110px;
+  .drum-baffles::before,
+  .drum-baffles::after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 84%;
+    background: var(--appliance-text-1);
+    border-radius: 2px;
+  }
+  .drum-baffles::after {
+    transform: rotate(60deg);
   }
 
   @keyframes drum-spin {
@@ -354,6 +366,14 @@ export const styles = css`
   }
   .segmented-bar::-webkit-scrollbar {
     display: none;
+  }
+  .segmented-bar.scrollable {
+    justify-content: flex-start;
+  }
+  .segmented-bar.scrollable .segment-btn {
+    flex: 0 0 auto;
+    min-width: max-content;
+    padding: 0 16px;
   }
   .segment-btn {
     flex: 1;
@@ -526,5 +546,231 @@ export const styles = css`
   }
   .compact-action-icon ha-icon {
     --mdc-icon-size: 18px;
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     Google Home Full View
+     ────────────────────────────────────────────────────────── */
+  .gh-full-card {
+    background: var(--appliance-bg);
+    border-radius: 28px;
+    border: none;
+    box-shadow: none;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+  .gh-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 20px;
+  }
+  .gh-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+  .gh-icon {
+    color: var(--appliance-text-2);
+    --mdc-icon-size: 22px;
+    flex-shrink: 0;
+  }
+  .gh-title {
+    font-weight: 500;
+    font-size: 1.05rem;
+    color: var(--appliance-text-1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gh-power-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--appliance-text-2);
+    cursor: pointer;
+    transition: 0.2s;
+    outline: none;
+    flex-shrink: 0;
+  }
+  .gh-power-btn:hover {
+    background: rgba(128, 128, 128, 0.15);
+  }
+  .gh-power-btn.on {
+    background: var(--appliance-active-bg, rgba(38, 166, 154, 0.2));
+    color: var(--appliance-accent);
+  }
+  .gh-power-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .gh-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 0;
+  }
+  .gh-value-large {
+    font-size: 4.6rem;
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--appliance-text-1);
+    letter-spacing: -1px;
+  }
+  .gh-subtitle-large {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--appliance-text-2);
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .gh-mode-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--appliance-on-accent, #ffffff);
+    background: var(--appliance-accent);
+    letter-spacing: 0.02em;
+  }
+  .gh-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 16px 0 24px 0;
+  }
+  .gh-circular-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(128, 128, 128, 0.15);
+    border: none;
+    color: var(--appliance-text-1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+    outline: none;
+    gap: 2px;
+  }
+  .gh-circular-btn:hover:not(.disabled) {
+    background: rgba(128, 128, 128, 0.25);
+  }
+  .gh-circular-btn.primary {
+    background: var(--appliance-accent);
+    color: var(--appliance-on-accent, #ffffff);
+  }
+  .gh-circular-btn.active {
+    background: var(--appliance-active-bg, rgba(38, 166, 154, 0.25));
+    color: var(--appliance-accent);
+    border: 1px solid var(--appliance-accent);
+  }
+  .gh-circular-btn.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .gh-circular-btn ha-icon {
+    --mdc-icon-size: 26px;
+  }
+  .gh-circular-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+  }
+  .gh-select-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: 12px;
+  }
+  .gh-select-wrapper {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 130px;
+    position: relative;
+  }
+  .gh-select-wrapper.active {
+    z-index: 100;
+  }
+  .gh-custom-select {
+    width: 100%;
+    background: rgba(128, 128, 128, 0.15);
+    border-radius: 20px;
+    border: none;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px 0 16px;
+    color: var(--appliance-text-1);
+    font-size: 0.92rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    user-select: none;
+    box-sizing: border-box;
+    transition: background 0.2s ease;
+  }
+  .gh-custom-select:hover:not(.disabled) {
+    background: rgba(128, 128, 128, 0.22);
+  }
+  .gh-custom-select.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .gh-custom-select ha-icon {
+    --mdc-icon-size: 18px;
+    color: var(--appliance-text-2);
+  }
+  .gh-dropdown-menu {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--appliance-surface, #232328);
+    border: 1px solid var(--appliance-border);
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 1000;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .gh-dropdown-item {
+    background: transparent;
+    border: none;
+    color: var(--appliance-text-1);
+    font-size: 0.88rem;
+    padding: 10px 14px;
+    border-radius: 12px;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  .gh-dropdown-item:hover {
+    background: rgba(128, 128, 128, 0.15);
+  }
+  .gh-dropdown-item.active {
+    background: color-mix(in srgb, var(--appliance-accent) 20%, transparent);
+    color: var(--appliance-accent);
+    font-weight: 600;
   }
 `;

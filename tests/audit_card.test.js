@@ -37,10 +37,11 @@ check(
 
 // 3. Drum Animation & Porthole
 check(
-  'Drum porthole progress ring and keyframes animation defined',
+  'Drum porthole progress ring and keyframes animation defined with clean drum-baffles',
   stylesFile.includes('@keyframes drum-spin') &&
-  stylesFile.includes('.drum-rotator') &&
-  stylesFile.includes('.porthole-ring-wrapper')
+  stylesFile.includes('.drum-baffles') &&
+  stylesFile.includes('.porthole-ring-wrapper') &&
+  !cardFile.includes('mdi:rotate-right')
 );
 
 // 4. Guarded States & Disabling
@@ -64,16 +65,17 @@ check(
 );
 
 check(
-  'Visual editor getConfigForm exposes Theme selection with Classic label',
+  'Visual editor getConfigForm exposes Theme selection with Default HA Theme and Material You',
   cardFile.includes('Material You') &&
-  cardFile.includes('Classic')
+  cardFile.includes('Default HA Theme')
 );
 
 // 6. Concentric Geometry & Segmented Controls
 check(
-  'Segmented selector bar with concentric button radii is defined',
+  'Segmented selector bar with concentric button radii and scrollable style is defined',
   stylesFile.includes('.segmented-bar') &&
-  stylesFile.includes('.segment-btn')
+  stylesFile.includes('.segment-btn') &&
+  stylesFile.includes('.segmented-bar.scrollable')
 );
 
 // 7. Diagnostics Footer
@@ -101,6 +103,16 @@ check(
   cardFile.includes('static getStubConfig') &&
   cardFile.includes('Please define a valid configuration') &&
   cardFile.includes('preview: true')
+);
+
+// 10. Google Home Full Layout
+check(
+  'Full View Style supports Classic and Google Home layouts with custom dropdowns',
+  cardFile.includes('Google Home') &&
+  cardFile.includes('_renderGoogleHomeFull') &&
+  stylesFile.includes('.gh-full-card') &&
+  stylesFile.includes('.gh-circular-btn') &&
+  stylesFile.includes('.gh-custom-select')
 );
 
 if (errors > 0) {

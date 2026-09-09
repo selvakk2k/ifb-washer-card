@@ -8,6 +8,24 @@ export class IFBWasherCard extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config!: IFBWasherCardConfig;
   @state() private _collapsed = false;
+  @state() private _ghDropdown: 'program' | 'spin' | 'temp' | 'delay' | null = null;
+
+  private _handleWindowClick = (e: MouseEvent) => {
+    const path = e.composedPath();
+    if (this._ghDropdown && !path.includes(this)) {
+      this._ghDropdown = null;
+    }
+  };
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    window.addEventListener('click', this._handleWindowClick);
+  }
+
+  disconnectedCallback(): void {
+    window.removeEventListener('click', this._handleWindowClick);
+    super.disconnectedCallback();
+  }
 
   static get styles() {
     return styles;
@@ -69,7 +87,7 @@ export class IFBWasherCard extends LitElement {
           selector: {
             select: {
               options: [
-                { label: 'Classic', value: 'default' },
+                { label: 'Default HA Theme', value: 'default' },
                 { label: 'Material You', value: 'material_you' },
               ],
             },
@@ -82,7 +100,19 @@ export class IFBWasherCard extends LitElement {
             select: {
               options: [
                 { label: 'Default (Full)', value: 'default' },
-                { label: 'Compact', value: 'compact' },
+                { label: 'Compact (Expandable)', value: 'compact' },
+              ],
+            },
+          },
+        },
+        {
+          name: 'full_layout',
+          label: 'Full View Style',
+          selector: {
+            select: {
+              options: [
+                { label: 'Classic', value: 'default' },
+                { label: 'Google Home', value: 'google_home' },
               ],
             },
           },
@@ -428,8 +458,41 @@ export class IFBWasherCard extends LitElement {
       subtitle = parts.join(' • ');
     }
 
+    const programOptions = (programObj?.attributes?.options as string[]) || [];
+    const spinOptions = (spinObj?.attributes?.options as string[]) || [];
+    const tempOptions = (tempObj?.attributes?.options as string[]) || [];
+    const delayOptions = (delayObj?.attributes?.options as string[]) || [];
+
     const isCompact = this._config.layout === 'compact';
     const isCollapsed = this._collapsed;
+
+    if (this._config.full_layout === 'google_home' && !(isCompact && isCollapsed)) {
+      return this._renderGoogleHomeFull(
+        entities,
+        title,
+        isOn,
+        isOnline,
+        isRunning,
+        isPaused,
+        isComplete,
+        machineState,
+        remMinutes,
+        progressPct,
+        currentProgram,
+        currentSpin,
+        currentTemp,
+        currentDelay,
+        isChildLockActive,
+        isDoorLocked,
+        hasProblem,
+        tubTemp,
+        motorRpm,
+        programOptions,
+        spinOptions,
+        tempOptions,
+        delayOptions
+      );
+    }
 
     // SVG Radial progress calculations
     const radius = 70;
@@ -598,6 +661,363 @@ export class IFBWasherCard extends LitElement {
     `;
   }
 
+  /* ── Google Home Full Dashboard Rendering ── */
+  private _renderGoogleHomeFull(
+    entities: ReturnType<typeof this._resolveEntities>,
+    title: string,
+    isOn: boolean,
+    isOnline: boolean,
+    isRunning: boolean,
+    isPaused: boolean,
+    isComplete: boolean,
+    machineState: string,
+    remMinutes: number,
+    progressPct: number,
+    currentProgram: string,
+    currentSpin: string,
+    currentTemp: string,
+    currentDelay: string,
+    isChildLockActive: boolean,
+    isDoorLocked: boolean,
+    hasProblem: boolean,
+    tubTemp: number,
+    motorRpm: number,
+    programOptions: string[],
+    spinOptions: string[],
+    tempOptions: string[],
+    delayOptions: string[]
+  ) {
+    const displayValue = isRunning
+      ? this._formatRemaining(remMinutes)
+      : !isOn
+      ? 'Off'
+      : isComplete
+      ? 'Done'
+      : 'Ready';
+
+    return html`
+      <ha-card class="gh-full-card">
+        <!-- Header -->
+        <div class="gh-header">
+          <div class="gh-header-left">
+            <ha-icon class="gh-icon" icon="mdi:washing-machine"></ha-icon>
+            <div class="gh-title">${title}</div>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            ${this._config.layout === 'compact'
+              ? html`
+                  <button
+                    class="gh-power-btn"
+                    title="Collapse card"
+                    @click=${() => {
+                      this._haptic('light');
+                      this._collapsed = true;
+                    }}
+                  >
+                    <ha-icon icon="mdi:chevron-up"></ha-icon>
+                  </button>
+                `
+              : nothing}
+            <button
+              class="gh-power-btn ${isOn ? 'on' : ''} ${!isOnline ? 'disabled' : ''}"
+              title="${!isOnline ? 'Device is offline' : isOn ? 'Turn Off' : 'Turn On'}"
+              @click=${() => this._togglePower(entities, isOnline)}
+            >
+              <ha-icon icon="mdi:power"></ha-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Center Hero Display -->
+        <div class="gh-center">
+          <div class="gh-value-large">${displayValue}</div>
+          <div class="gh-subtitle-large">
+            <div>
+              ${machineState}${tubTemp > 0 ? ` • ${tubTemp}°C` : ''}${motorRpm > 0 ? ` • ${motorRpm} RPM` : ''}
+            </div>
+            ${isOn
+              ? html`
+                  <div class="gh-mode-pill">
+                    ${isRunning ? machineState : currentProgram || 'Standby'}
+                  </div>
+                `
+              : nothing}
+          </div>
+        </div>
+
+        <!-- Action Row (Circular Buttons: Start, Pause, Cancel) -->
+        <div class="gh-action-row">
+          <button
+            class="gh-circular-btn primary ${!isOnline || !isOn || isRunning ? 'disabled' : ''}"
+            title="${!isOnline
+              ? 'Device is offline'
+              : !isOn
+              ? 'Turn on the washer to start'
+              : isRunning
+              ? 'Cycle is already running'
+              : 'Start Cycle'}"
+            @click=${() => this._triggerButton(entities.start, isOnline, isOn)}
+          >
+            <ha-icon icon="mdi:play"></ha-icon>
+            <span class="gh-circular-label">${isPaused ? 'Resume' : 'Start'}</span>
+          </button>
+
+          <button
+            class="gh-circular-btn ${isPaused ? 'active' : ''} ${!isOnline || !isOn || !isRunning ? 'disabled' : ''}"
+            title="${!isOnline
+              ? 'Device is offline'
+              : !isOn
+              ? 'Turn on the washer'
+              : !isRunning
+              ? 'No cycle currently running'
+              : 'Pause Cycle'}"
+            @click=${() => this._triggerButton(entities.pause, isOnline, isOn)}
+          >
+            <ha-icon icon="mdi:pause"></ha-icon>
+            <span class="gh-circular-label">Pause</span>
+          </button>
+
+          <button
+            class="gh-circular-btn ${!isOnline || !isOn || (!isRunning && !isPaused) ? 'disabled' : ''}"
+            title="${!isOnline
+              ? 'Device is offline'
+              : !isOn
+              ? 'Turn on the washer'
+              : !isRunning && !isPaused
+              ? 'No active cycle to cancel'
+              : 'Cancel Cycle'}"
+            @click=${() => this._triggerButton(entities.cancel, isOnline, isOn)}
+          >
+            <ha-icon icon="mdi:stop"></ha-icon>
+            <span class="gh-circular-label">Cancel</span>
+          </button>
+        </div>
+
+        <!-- Dropdowns for Program, Spin, Temp, Delay -->
+        <div class="gh-select-container">
+          <!-- Program Dropdown -->
+          <div class="gh-select-wrapper ${this._ghDropdown === 'program' ? 'active' : ''}">
+            <button
+              class="gh-custom-select ${!isOnline || !isOn ? 'disabled' : ''}"
+              @click=${(e: Event) => {
+                e.stopPropagation();
+                if (!isOnline) this._showToast('Device is offline');
+                else if (!isOn) this._showToast('Turn on the washer to adjust settings');
+                else {
+                  this._haptic('selection');
+                  this._ghDropdown = this._ghDropdown === 'program' ? null : 'program';
+                }
+              }}
+            >
+              <span>Program: ${currentProgram || 'Select'}</span>
+              <ha-icon icon="mdi:chevron-down"></ha-icon>
+            </button>
+            ${this._ghDropdown === 'program'
+              ? html`
+                  <div class="gh-dropdown-menu">
+                    ${(programOptions.length > 0
+                      ? programOptions
+                      : ['Mix / Daily', 'Cotton', 'Express 15', 'Tub Clean']
+                    ).map(
+                      (prog) => html`
+                        <button
+                          class="gh-dropdown-item ${currentProgram === prog ? 'active' : ''}"
+                          @click=${(e: Event) => {
+                            e.stopPropagation();
+                            this._ghDropdown = null;
+                            this._selectOption(entities.program, prog, isOnline, isOn, isRunning, true);
+                          }}
+                        >
+                          ${prog}
+                        </button>
+                      `
+                    )}
+                  </div>
+                `
+              : nothing}
+          </div>
+
+          <!-- Spin Speed Dropdown -->
+          <div class="gh-select-wrapper ${this._ghDropdown === 'spin' ? 'active' : ''}">
+            <button
+              class="gh-custom-select ${!isOnline || !isOn ? 'disabled' : ''}"
+              @click=${(e: Event) => {
+                e.stopPropagation();
+                if (!isOnline) this._showToast('Device is offline');
+                else if (!isOn) this._showToast('Turn on the washer to adjust settings');
+                else {
+                  this._haptic('selection');
+                  this._ghDropdown = this._ghDropdown === 'spin' ? null : 'spin';
+                }
+              }}
+            >
+              <span>Spin: ${currentSpin || 'Select'}</span>
+              <ha-icon icon="mdi:chevron-down"></ha-icon>
+            </button>
+            ${this._ghDropdown === 'spin'
+              ? html`
+                  <div class="gh-dropdown-menu">
+                    ${(spinOptions.length > 0
+                      ? spinOptions
+                      : ['No Spin', '400 RPM', '800 RPM', '1000 RPM', '1400 RPM']
+                    ).map(
+                      (sp) => html`
+                        <button
+                          class="gh-dropdown-item ${currentSpin === sp ? 'active' : ''}"
+                          @click=${(e: Event) => {
+                            e.stopPropagation();
+                            this._ghDropdown = null;
+                            this._selectOption(entities.spin, sp, isOnline, isOn, isRunning, false);
+                          }}
+                        >
+                          ${sp}
+                        </button>
+                      `
+                    )}
+                  </div>
+                `
+              : nothing}
+          </div>
+
+          <!-- Temperature Dropdown -->
+          <div class="gh-select-wrapper ${this._ghDropdown === 'temp' ? 'active' : ''}">
+            <button
+              class="gh-custom-select ${!isOnline || !isOn ? 'disabled' : ''}"
+              @click=${(e: Event) => {
+                e.stopPropagation();
+                if (!isOnline) this._showToast('Device is offline');
+                else if (!isOn) this._showToast('Turn on the washer to adjust settings');
+                else {
+                  this._haptic('selection');
+                  this._ghDropdown = this._ghDropdown === 'temp' ? null : 'temp';
+                }
+              }}
+            >
+              <span>Temp: ${currentTemp || 'Select'}</span>
+              <ha-icon icon="mdi:chevron-down"></ha-icon>
+            </button>
+            ${this._ghDropdown === 'temp'
+              ? html`
+                  <div class="gh-dropdown-menu">
+                    ${(tempOptions.length > 0
+                      ? tempOptions
+                      : ['Cold', '20°C', '30°C', '40°C', '60°C', '95°C']
+                    ).map(
+                      (tp) => html`
+                        <button
+                          class="gh-dropdown-item ${currentTemp === tp ? 'active' : ''}"
+                          @click=${(e: Event) => {
+                            e.stopPropagation();
+                            this._ghDropdown = null;
+                            this._selectOption(entities.temp, tp, isOnline, isOn, isRunning, false);
+                          }}
+                        >
+                          ${tp}
+                        </button>
+                      `
+                    )}
+                  </div>
+                `
+              : nothing}
+          </div>
+
+          <!-- Delay Start Dropdown -->
+          <div class="gh-select-wrapper ${this._ghDropdown === 'delay' ? 'active' : ''}">
+            <button
+              class="gh-custom-select ${!isOnline || !isOn ? 'disabled' : ''}"
+              @click=${(e: Event) => {
+                e.stopPropagation();
+                if (!isOnline) this._showToast('Device is offline');
+                else if (!isOn) this._showToast('Turn on the washer to adjust settings');
+                else {
+                  this._haptic('selection');
+                  this._ghDropdown = this._ghDropdown === 'delay' ? null : 'delay';
+                }
+              }}
+            >
+              <span>Delay: ${currentDelay || 'No Delay'}</span>
+              <ha-icon icon="mdi:chevron-down"></ha-icon>
+            </button>
+            ${this._ghDropdown === 'delay'
+              ? html`
+                  <div class="gh-dropdown-menu">
+                    ${(delayOptions.length > 0
+                      ? delayOptions
+                      : ['No Delay', '30 Minutes', '1 Hour', '2 Hours', '4 Hours']
+                    ).map(
+                      (dl) => html`
+                        <button
+                          class="gh-dropdown-item ${currentDelay === dl ? 'active' : ''}"
+                          @click=${(e: Event) => {
+                            e.stopPropagation();
+                            this._ghDropdown = null;
+                            this._selectOption(entities.delay, dl, isOnline, isOn, isRunning, false);
+                          }}
+                        >
+                          ${dl}
+                        </button>
+                      `
+                    )}
+                  </div>
+                `
+              : nothing}
+          </div>
+        </div>
+
+        <!-- Auxiliary Status Chips -->
+        <div class="aux-chips-row" style="margin-bottom: 12px;">
+          ${entities.childLock
+            ? html`
+                <div
+                  class="chip-btn ${isChildLockActive ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
+                  title="Toggle Child Lock"
+                  @click=${() => this._toggleChildLock(entities.childLock, isOnline, isOn)}
+                >
+                  <ha-icon icon="${isChildLockActive ? 'mdi:account-lock' : 'mdi:account-lock-open-outline'}"></ha-icon>
+                  <span>${isChildLockActive ? 'Child Lock Active' : 'Child Lock Off'}</span>
+                </div>
+              `
+            : nothing}
+          <div class="chip-btn ${isDoorLocked ? 'active' : ''}">
+            <ha-icon icon="${isDoorLocked ? 'mdi:door-closed-lock' : 'mdi:door-open'}"></ha-icon>
+            <span>${isDoorLocked ? 'Door Locked' : 'Door Unlocked'}</span>
+          </div>
+        </div>
+
+        <!-- Diagnostics & Telemetry Footer -->
+        <div class="footer">
+          <div class="footer-item">
+            <span class="footer-dot ${isOnline ? 'green' : 'red'}"></span>
+            <span>Local LAN</span>
+          </div>
+          •
+          <div class="footer-item">
+            <span class="footer-dot ${isDoorLocked ? 'red' : 'green'}"></span>
+            <span>${isDoorLocked ? 'Door Locked' : 'Door Unlocked'}</span>
+          </div>
+          ${tubTemp > 0
+            ? html`
+                •
+                <div class="footer-item">
+                  <ha-icon icon="mdi:thermometer"></ha-icon>
+                  <span>${tubTemp}°C</span>
+                </div>
+              `
+            : nothing}
+          ${motorRpm > 0
+            ? html`
+                •
+                <div class="footer-item">
+                  <ha-icon icon="mdi:speedometer"></ha-icon>
+                  <span>${motorRpm} RPM</span>
+                </div>
+              `
+            : nothing}
+        </div>
+      </ha-card>
+    `;
+  }
+
   /* ── Full Dashboard Rendering ── */
   private _renderFullBody(
     entities: ReturnType<typeof this._resolveEntities>,
@@ -647,11 +1067,9 @@ export class IFBWasherCard extends LitElement {
               : nothing}
           </svg>
           <div class="drum-porthole">
-            <div
-              class="drum-rotator ${isRunning ? (isSpinningFast ? 'fast-spin' : 'spinning') : ''}"
-            >
-              <ha-icon icon="mdi:rotate-right"></ha-icon>
-            </div>
+            ${isRunning
+              ? html`<div class="drum-baffles ${isSpinningFast ? 'fast-spin' : 'spinning'}"></div>`
+              : nothing}
             <div class="porthole-content">
               <div class="porthole-hero-time">
                 ${isRunning
@@ -729,7 +1147,7 @@ export class IFBWasherCard extends LitElement {
 
       <!-- Program Selection Bar -->
       <div class="section-label">Wash Program</div>
-      <div class="segmented-bar">
+      <div class="segmented-bar scrollable">
         ${(programOptions.length > 0
           ? programOptions
           : ['Mix / Daily', 'Cotton', 'Express 15', 'Tub Clean']
