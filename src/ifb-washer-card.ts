@@ -69,7 +69,7 @@ export class IFBWasherCard extends LitElement {
           selector: {
             select: {
               options: [
-                { label: 'Default HA Theme', value: 'default' },
+                { label: 'Classic', value: 'default' },
                 { label: 'Material You', value: 'material_you' },
               ],
             },
@@ -405,20 +405,20 @@ export class IFBWasherCard extends LitElement {
         <!-- Diagnostics & Telemetry Footer -->
         <div class="footer">
           <div class="footer-item">
-            <span class="footer-dot ${!isOnline ? 'error' : 'online'}"></span>
-            <span>${!isOnline ? 'Offline' : 'Local LAN (Port 80)'}</span>
+            <span class="footer-dot ${isOnline ? 'green' : 'red'}"></span>
+            <span>Local LAN</span>
           </div>
           •
           <div class="footer-item">
-            <span class="footer-dot ${isDoorLocked ? 'online' : 'warning'}"></span>
+            <span class="footer-dot ${isDoorLocked ? 'red' : 'green'}"></span>
             <span>${isDoorLocked ? 'Door Locked' : 'Door Unlocked'}</span>
           </div>
           ${tubTemp > 0
             ? html`
                 •
                 <div class="footer-item">
-                  <span class="footer-dot online"></span>
-                  <span>Tub: ${tubTemp}°C</span>
+                  <ha-icon icon="mdi:thermometer"></ha-icon>
+                  <span>${tubTemp}°C</span>
                 </div>
               `
             : nothing}
@@ -426,7 +426,7 @@ export class IFBWasherCard extends LitElement {
             ? html`
                 •
                 <div class="footer-item">
-                  <span class="footer-dot online"></span>
+                  <ha-icon icon="mdi:speedometer"></ha-icon>
                   <span>${motorRpm} RPM</span>
                 </div>
               `

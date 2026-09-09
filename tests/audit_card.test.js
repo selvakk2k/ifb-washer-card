@@ -64,9 +64,9 @@ check(
 );
 
 check(
-  'Visual editor getConfigForm exposes Theme selection',
+  'Visual editor getConfigForm exposes Theme selection with Classic label',
   cardFile.includes('Material You') &&
-  cardFile.includes('Default HA Theme')
+  cardFile.includes('Classic')
 );
 
 // 6. Concentric Geometry & Segmented Controls
@@ -78,9 +78,12 @@ check(
 
 // 7. Diagnostics Footer
 check(
-  'Centered diagnostics footer with status dots is defined',
+  'Centered diagnostics footer with red and green status dots and simple telemetry icons is defined',
   stylesFile.includes('.footer') &&
-  stylesFile.includes('.footer-dot')
+  stylesFile.includes('.footer-dot.green') &&
+  stylesFile.includes('.footer-dot.red') &&
+  cardFile.includes('mdi:thermometer') &&
+  cardFile.includes('mdi:speedometer')
 );
 
 if (errors > 0) {

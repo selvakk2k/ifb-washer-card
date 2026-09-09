@@ -446,20 +446,26 @@ export const styles = css`
   .footer-item {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
+  }
+  .footer-item ha-icon {
+    --mdc-icon-size: 15px;
+    color: var(--appliance-text-2);
   }
   .footer-dot {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #10b981;
     display: inline-block;
+  }
+  .footer-dot.green {
+    background: #10b981;
+  }
+  .footer-dot.red {
+    background: #ef4444;
   }
   .footer-dot.warning {
     background: #f59e0b;
-  }
-  .footer-dot.error {
-    background: #ef4444;
   }
 
   /* ── Compact View ── */
