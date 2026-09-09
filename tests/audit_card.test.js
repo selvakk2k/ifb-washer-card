@@ -86,6 +86,15 @@ check(
   cardFile.includes('mdi:speedometer')
 );
 
+// 8. Companion Entity Auto-Discovery
+check(
+  'Automatic companion discovery resolves entities using device_id and translation keys',
+  cardFile.includes('reg[rawId].device_id') &&
+  cardFile.includes('meta.device_id !== deviceId') &&
+  cardFile.includes('_power_switch') &&
+  cardFile.includes('_program_select')
+);
+
 if (errors > 0) {
   console.error(`\nAudit completed with ${errors} error(s).`);
   process.exit(1);

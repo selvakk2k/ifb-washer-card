@@ -119,7 +119,55 @@ export class IFBWasherCard extends LitElement {
   /* ── Entity Auto-Discovery & Prefix Resolution ── */
   private _resolveEntities() {
     const rawId = this._config.entity;
-    // Extract domain and object_id
+    const c = this._config;
+
+    let power = c.power_switch;
+    let start = c.start_button;
+    let pause = c.pause_button;
+    let cancel = c.cancel_button;
+    let program = c.program_select;
+    let spin = c.spin_select;
+    let temp = c.temperature_select;
+    let delay = c.delay_select;
+    let childLock = c.child_lock_switch;
+    let state = c.machine_state_sensor;
+    let remaining = c.time_remaining_sensor;
+    let progress = c.cycle_progress_sensor;
+    let tubTemp = c.tub_temp_sensor;
+    let rpm = c.motor_speed_sensor;
+    let door = c.door_locked_sensor;
+    let problem = '';
+
+    // Smart Device-Level Companion Discovery via Home Assistant Entity Registry
+    const reg = (this.hass as any)?.entities;
+    if (reg && reg[rawId]) {
+      const deviceId = reg[rawId].device_id;
+      if (deviceId) {
+        for (const [id, meta] of Object.entries<any>(reg)) {
+          if (meta.device_id !== deviceId) continue;
+          const u = meta.unique_id || '';
+          const t = meta.translation_key || '';
+          if (!power && (u.endsWith('_power_switch') || t === 'power')) power = id;
+          if (!start && (u.endsWith('_start') || t === 'start')) start = id;
+          if (!pause && (u.endsWith('_pause') || t === 'pause')) pause = id;
+          if (!cancel && (u.endsWith('_cancel') || t === 'cancel')) cancel = id;
+          if (!program && (u.endsWith('_program_select') || t === 'program_select')) program = id;
+          if (!spin && (u.endsWith('_spin_speed_select') || t === 'spin_speed_select')) spin = id;
+          if (!temp && (u.endsWith('_temperature_select') || t === 'temperature_select')) temp = id;
+          if (!delay && (u.endsWith('_delay_start_select') || t === 'delay_start_select')) delay = id;
+          if (!childLock && (u.endsWith('_child_lock_switch') || t === 'child_lock_switch')) childLock = id;
+          if (!state && (u.endsWith('_state') || t === 'machine_state')) state = id;
+          if (!remaining && (u.endsWith('_time_remaining') || t === 'time_remaining')) remaining = id;
+          if (!progress && (u.endsWith('_cycle_progress') || t === 'cycle_progress')) progress = id;
+          if (!tubTemp && (u.endsWith('_tub_temperature') || t === 'tub_temperature')) tubTemp = id;
+          if (!rpm && (u.endsWith('_motor_rpm') || t === 'motor_rpm' || u.endsWith('_motor_speed'))) rpm = id;
+          if (!door && (u.endsWith('_door_locked') || t === 'door_locked')) door = id;
+          if (!problem && (u.endsWith('_problem') || t === 'problem')) problem = id;
+        }
+      }
+    }
+
+    // Extract domain and object_id fallback
     const parts = rawId.split('.');
     const objectId = parts[1] || '';
 
@@ -153,24 +201,23 @@ export class IFBWasherCard extends LitElement {
       }
     }
 
-    const c = this._config;
     return {
-      power: c.power_switch || `switch.${prefix}_power`,
-      start: c.start_button || `button.${prefix}_start`,
-      pause: c.pause_button || `button.${prefix}_pause`,
-      cancel: c.cancel_button || `button.${prefix}_cancel`,
-      program: c.program_select || `select.${prefix}_program_select`,
-      spin: c.spin_select || `select.${prefix}_spin_speed_select`,
-      temp: c.temperature_select || `select.${prefix}_temperature_select`,
-      delay: c.delay_select || `select.${prefix}_delay_start_select`,
-      childLock: c.child_lock_switch || `switch.${prefix}_child_lock_switch`,
-      state: c.machine_state_sensor || `sensor.${prefix}_machine_state`,
-      remaining: c.time_remaining_sensor || `sensor.${prefix}_time_remaining`,
-      progress: c.cycle_progress_sensor || `sensor.${prefix}_cycle_progress`,
-      tubTemp: c.tub_temp_sensor || `sensor.${prefix}_tub_temperature`,
-      rpm: c.motor_speed_sensor || `sensor.${prefix}_motor_speed`,
-      door: c.door_locked_sensor || `binary_sensor.${prefix}_door_locked`,
-      problem: `binary_sensor.${prefix}_problem`,
+      power: power || `switch.${prefix}_power`,
+      start: start || `button.${prefix}_start`,
+      pause: pause || `button.${prefix}_pause`,
+      cancel: cancel || `button.${prefix}_cancel`,
+      program: program || `select.${prefix}_program_select`,
+      spin: spin || `select.${prefix}_spin_speed_select`,
+      temp: temp || `select.${prefix}_temperature_select`,
+      delay: delay || `select.${prefix}_delay_start_select`,
+      childLock: childLock || `switch.${prefix}_child_lock_switch`,
+      state: state || `sensor.${prefix}_machine_state`,
+      remaining: remaining || `sensor.${prefix}_time_remaining`,
+      progress: progress || `sensor.${prefix}_cycle_progress`,
+      tubTemp: tubTemp || `sensor.${prefix}_tub_temperature`,
+      rpm: rpm || `sensor.${prefix}_motor_speed`,
+      door: door || `binary_sensor.${prefix}_door_locked`,
+      problem: problem || `binary_sensor.${prefix}_problem`,
     };
   }
 
