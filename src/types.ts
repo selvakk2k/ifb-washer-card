@@ -1,6 +1,6 @@
 export interface IFBWasherCardConfig {
   type: string;
-  entity: string;
+  entity?: string;
   name?: string;
   show_icon?: boolean;
   theme?: 'default' | 'material_you' | string;

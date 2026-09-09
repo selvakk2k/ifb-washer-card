@@ -76,13 +76,7 @@ export class IFBWasherCard extends LitElement {
   public static getConfigForm() {
     return {
       schema: [
-        {
-          name: 'entity',
-          required: true,
-          label: 'Washer Entity',
-          selector: { entity: { domain: ['select', 'switch'] } },
-        },
-        { name: 'name', label: 'Custom Title', selector: { text: {} } },
+        { name: 'name', label: 'Custom Title (Auto-discovered if blank)', selector: { text: {} } },
         {
           name: 'theme',
           label: 'Theme',
@@ -165,32 +159,9 @@ export class IFBWasherCard extends LitElement {
     };
   }
 
-  public static getStubConfig(hass?: HomeAssistant, entities?: string[], entitiesFallback?: string[]) {
-    let entity = '';
-    if (entities && entities.length) {
-      entity =
-        entities.find((e) => e.startsWith('select.') && (e.includes('program') || e.includes('ifb_washer'))) ||
-        entities.find((e) => e.startsWith('switch.') && (e.includes('power') || e.includes('ifb_washer'))) ||
-        entities.find((e) => e.includes('ifb_washer')) ||
-        '';
-    }
-    if (!entity && entitiesFallback && entitiesFallback.length) {
-      entity = entitiesFallback.find((e) => e.includes('ifb_washer')) || '';
-    }
-    if (!entity && hass?.states) {
-      entity =
-        Object.keys(hass.states).find(
-          (e) => e.startsWith('select.') && (e.includes('program') || e.includes('ifb_washer'))
-        ) ||
-        Object.keys(hass.states).find(
-          (e) => e.startsWith('switch.') && (e.includes('power') || e.includes('ifb_washer'))
-        ) ||
-        Object.keys(hass.states).find((e) => e.includes('ifb_washer')) ||
-        '';
-    }
+  public static getStubConfig(hass?: HomeAssistant) {
     return {
       type: 'custom:ifb-washer-card',
-      entity,
     };
   }
 
@@ -212,7 +183,7 @@ export class IFBWasherCard extends LitElement {
 
   /* ── Entity Auto-Discovery & Prefix Resolution ── */
   private _resolveEntities() {
-    const rawId = this._config?.entity || '';
+    let rawId = this._config?.entity || '';
     const c = this._config || ({} as IFBWasherCardConfig);
 
     let power = c.power_switch;
@@ -231,9 +202,25 @@ export class IFBWasherCard extends LitElement {
     let rpm = c.motor_speed_sensor;
     let door = c.door_locked_sensor;
     let problem = '';
+    let deviceId = '';
 
-    if (!rawId) {
+    // If no entity was explicitly provided, auto-discover any IFB washer entity to anchor device discovery
+    if (!rawId && this.hass?.states) {
+      const stateKeys = Object.keys(this.hass.states);
+      rawId =
+        stateKeys.find(
+          (id) => id.startsWith('switch.') && (id.includes('_power') || id.includes('ifb_washer'))
+        ) ||
+        stateKeys.find(
+          (id) => id.startsWith('select.') && (id.includes('_program') || id.includes('ifb_washer'))
+        ) ||
+        stateKeys.find((id) => id.includes('ifb_washer')) ||
+        '';
+    }
+
+    if (!rawId && !power && !program && !state) {
       return {
+        deviceId: '',
         power: power || '',
         start: start || '',
         pause: pause || '',
@@ -255,8 +242,8 @@ export class IFBWasherCard extends LitElement {
 
     // Smart Device-Level Companion Discovery via Home Assistant Entity Registry
     const reg = (this.hass as any)?.entities;
-    if (reg && reg[rawId]) {
-      const deviceId = reg[rawId].device_id;
+    if (reg && rawId && reg[rawId]) {
+      deviceId = reg[rawId].device_id || '';
       if (deviceId) {
         for (const [id, meta] of Object.entries<any>(reg)) {
           if (meta.device_id !== deviceId) continue;
@@ -317,22 +304,23 @@ export class IFBWasherCard extends LitElement {
     }
 
     return {
-      power: power || `switch.${prefix}_power`,
-      start: start || `button.${prefix}_start`,
-      pause: pause || `button.${prefix}_pause`,
-      cancel: cancel || `button.${prefix}_cancel`,
-      program: program || `select.${prefix}_program_select`,
-      spin: spin || `select.${prefix}_spin_speed_select`,
-      temp: temp || `select.${prefix}_temperature_select`,
-      delay: delay || `select.${prefix}_delay_start_select`,
-      childLock: childLock || `switch.${prefix}_child_lock_switch`,
-      state: state || `sensor.${prefix}_machine_state`,
-      remaining: remaining || `sensor.${prefix}_time_remaining`,
-      progress: progress || `sensor.${prefix}_cycle_progress`,
-      tubTemp: tubTemp || `sensor.${prefix}_tub_temperature`,
-      rpm: rpm || `sensor.${prefix}_motor_speed`,
-      door: door || `binary_sensor.${prefix}_door_locked`,
-      problem: problem || `binary_sensor.${prefix}_problem`,
+      deviceId,
+      power: power || (prefix ? `switch.${prefix}_power` : ''),
+      start: start || (prefix ? `button.${prefix}_start` : ''),
+      pause: pause || (prefix ? `button.${prefix}_pause` : ''),
+      cancel: cancel || (prefix ? `button.${prefix}_cancel` : ''),
+      program: program || (prefix ? `select.${prefix}_program_select` : ''),
+      spin: spin || (prefix ? `select.${prefix}_spin_speed_select` : ''),
+      temp: temp || (prefix ? `select.${prefix}_temperature_select` : ''),
+      delay: delay || (prefix ? `select.${prefix}_delay_start_select` : ''),
+      childLock: childLock || (prefix ? `switch.${prefix}_child_lock_switch` : ''),
+      state: state || (prefix ? `sensor.${prefix}_machine_state` : ''),
+      remaining: remaining || (prefix ? `sensor.${prefix}_time_remaining` : ''),
+      progress: progress || (prefix ? `sensor.${prefix}_cycle_progress` : ''),
+      tubTemp: tubTemp || (prefix ? `sensor.${prefix}_tub_temperature` : ''),
+      rpm: rpm || (prefix ? `sensor.${prefix}_motor_speed` : ''),
+      door: door || (prefix ? `binary_sensor.${prefix}_door_locked` : ''),
+      problem: problem || (prefix ? `binary_sensor.${prefix}_problem` : ''),
     };
   }
 
@@ -417,37 +405,37 @@ export class IFBWasherCard extends LitElement {
       return nothing;
     }
 
-    if (!this._config.entity) {
+    const entities = this._resolveEntities();
+    const powerState = entities.power ? this.hass.states[entities.power] : undefined;
+    const machineStateObj = entities.state ? this.hass.states[entities.state] : undefined;
+    const remainingObj = entities.remaining ? this.hass.states[entities.remaining] : undefined;
+    const progressObj = entities.progress ? this.hass.states[entities.progress] : undefined;
+    const programObj = entities.program ? this.hass.states[entities.program] : undefined;
+    const spinObj = entities.spin ? this.hass.states[entities.spin] : undefined;
+    const tempObj = entities.temp ? this.hass.states[entities.temp] : undefined;
+    const delayObj = entities.delay ? this.hass.states[entities.delay] : undefined;
+    const childLockObj = entities.childLock ? this.hass.states[entities.childLock] : undefined;
+    const tubTempObj = entities.tubTemp ? this.hass.states[entities.tubTemp] : undefined;
+    const rpmObj = entities.rpm ? this.hass.states[entities.rpm] : undefined;
+    const doorObj = entities.door ? this.hass.states[entities.door] : undefined;
+    const problemObj = entities.problem ? this.hass.states[entities.problem] : undefined;
+
+    if (!powerState && !machineStateObj && !programObj) {
       return html`
         <ha-card class="ifb-washer-card">
           <div style="padding: 24px; text-align: center; color: var(--appliance-text-2, #8e8e93);">
             <ha-icon icon="mdi:washing-machine" style="--mdc-icon-size: 40px; margin-bottom: 8px; opacity: 0.6;"></ha-icon>
             <div style="font-weight: 500; font-size: 15px; color: var(--appliance-text-1, inherit);">IFB Washer Card</div>
-            <div style="font-size: 13px; margin-top: 4px;">Please select a Washer Entity in the card configuration editor.</div>
+            <div style="font-size: 13px; margin-top: 4px;">No IFB Washer detected on your Home Assistant instance. Please ensure the IFB Washer integration is configured.</div>
           </div>
         </ha-card>
       `;
     }
 
-    const entities = this._resolveEntities();
-    const powerState = this.hass.states[entities.power];
-    const machineStateObj = this.hass.states[entities.state];
-    const remainingObj = this.hass.states[entities.remaining];
-    const progressObj = this.hass.states[entities.progress];
-    const programObj = this.hass.states[entities.program];
-    const spinObj = this.hass.states[entities.spin];
-    const tempObj = this.hass.states[entities.temp];
-    const delayObj = this.hass.states[entities.delay];
-    const childLockObj = this.hass.states[entities.childLock];
-    const tubTempObj = this.hass.states[entities.tubTemp];
-    const rpmObj = this.hass.states[entities.rpm];
-    const doorObj = this.hass.states[entities.door];
-    const problemObj = this.hass.states[entities.problem];
-
     const isOnline = Boolean(
       powerState && powerState.state !== 'unavailable' && powerState.state !== 'unknown'
     );
-    const isOn = isOnline && powerState.state === 'on';
+    const isOn = isOnline && powerState?.state === 'on';
 
     const machineState = machineStateObj?.state || (isOn ? 'Standby' : 'Off');
     const isRunning =
@@ -473,10 +461,26 @@ export class IFBWasherCard extends LitElement {
     const tubTemp = tubTempObj ? parseInt(tubTempObj.state, 10) || 0 : 0;
     const motorRpm = rpmObj ? parseInt(rpmObj.state, 10) || 0 : 0;
 
-    const title =
-      this._config.name ||
-      powerState?.attributes?.friendly_name?.replace(/ Power$/, '') ||
-      'IFB Washing Machine';
+    // Resolve clean device title
+    let autoTitle = '';
+    if (entities.deviceId) {
+      const dev = (this.hass as any)?.devices?.[entities.deviceId];
+      if (dev?.name_by_user) {
+        autoTitle = dev.name_by_user;
+      } else if (dev?.name) {
+        const m = dev.name.match(/\(([^)]+)\)/);
+        autoTitle = m && !m[1].includes('.') ? m[1] : dev.model || dev.name.replace(/^IFB\s+/i, '').replace(/\s*\([^)]*\)$/, '');
+      } else if (dev?.model) {
+        autoTitle = dev.model;
+      }
+    }
+    if (!autoTitle && powerState?.attributes?.friendly_name) {
+      const fn = powerState.attributes.friendly_name.replace(/\s*Power$/i, '');
+      const m = fn.match(/\(([^)]+)\)/);
+      autoTitle = m && !m[1].includes('.') ? m[1] : fn.replace(/^IFB\s+/i, '').replace(/\s*\([^)]*\)$/, '');
+    }
+
+    const title = this._config.name || autoTitle || 'IFB Washing Machine';
 
     // Subtitle summary
     let subtitle = 'Off';
@@ -692,7 +696,7 @@ export class IFBWasherCard extends LitElement {
           </div>
           <div class="header-right">
             <button
-              class="collapse-btn collapsed"
+              class="collapse-btn"
               title="Expand Card"
               @click=${(e: Event) => {
                 e.stopPropagation();

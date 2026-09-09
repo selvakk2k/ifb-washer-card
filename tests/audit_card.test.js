@@ -142,6 +142,15 @@ check(
   cardFile.includes('child_lock_switch')
 );
 
+// 14. Device-Level Auto-Discovery & Clean Device Title
+check(
+  'Auto-discovers washer device without required entity and resolves clean device title',
+  !cardFile.includes("name: 'entity',") &&
+  cardFile.includes('entities.deviceId') &&
+  cardFile.includes('name_by_user') &&
+  !stylesFile.includes('.collapse-btn.collapsed ha-icon')
+);
+
 if (errors > 0) {
   console.error(`\nAudit completed with ${errors} error(s).`);
   process.exit(1);

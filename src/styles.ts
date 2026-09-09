@@ -126,10 +126,6 @@ export const styles = css`
   }
   .collapse-btn ha-icon {
     --mdc-icon-size: 20px;
-    transition: transform 0.25s ease;
-  }
-  .collapse-btn.collapsed ha-icon {
-    transform: rotate(180deg);
   }
 
   .power-btn {
