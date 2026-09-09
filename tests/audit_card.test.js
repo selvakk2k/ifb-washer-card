@@ -95,6 +95,14 @@ check(
   cardFile.includes('_program_select')
 );
 
+// 9. Card Picker Preview & Stub Config
+check(
+  'Card implements getStubConfig and safe setConfig for Home Assistant card picker preview',
+  cardFile.includes('static getStubConfig') &&
+  cardFile.includes('Please define a valid configuration') &&
+  cardFile.includes('preview: true')
+);
+
 if (errors > 0) {
   console.error(`\nAudit completed with ${errors} error(s).`);
   process.exit(1);

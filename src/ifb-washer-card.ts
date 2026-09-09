@@ -14,8 +14,8 @@ export class IFBWasherCard extends LitElement {
   }
 
   public setConfig(config: IFBWasherCardConfig): void {
-    if (!config.entity) {
-      throw new Error('Please define an entity in the card configuration');
+    if (!config) {
+      throw new Error('Please define a valid configuration');
     }
     this._config = {
       theme: 'default',
@@ -60,7 +60,7 @@ export class IFBWasherCard extends LitElement {
           name: 'entity',
           required: true,
           label: 'Washer Entity',
-          selector: { entity: { integration: 'ifb_washer_local' } },
+          selector: { entity: { domain: ['select', 'switch'] } },
         },
         { name: 'name', label: 'Custom Title', selector: { text: {} } },
         {
@@ -100,6 +100,35 @@ export class IFBWasherCard extends LitElement {
     };
   }
 
+  public static getStubConfig(hass?: HomeAssistant, entities?: string[], entitiesFallback?: string[]) {
+    let entity = '';
+    if (entities && entities.length) {
+      entity =
+        entities.find((e) => e.startsWith('select.') && (e.includes('program') || e.includes('ifb_washer'))) ||
+        entities.find((e) => e.startsWith('switch.') && (e.includes('power') || e.includes('ifb_washer'))) ||
+        entities.find((e) => e.includes('ifb_washer')) ||
+        '';
+    }
+    if (!entity && entitiesFallback && entitiesFallback.length) {
+      entity = entitiesFallback.find((e) => e.includes('ifb_washer')) || '';
+    }
+    if (!entity && hass?.states) {
+      entity =
+        Object.keys(hass.states).find(
+          (e) => e.startsWith('select.') && (e.includes('program') || e.includes('ifb_washer'))
+        ) ||
+        Object.keys(hass.states).find(
+          (e) => e.startsWith('switch.') && (e.includes('power') || e.includes('ifb_washer'))
+        ) ||
+        Object.keys(hass.states).find((e) => e.includes('ifb_washer')) ||
+        '';
+    }
+    return {
+      type: 'custom:ifb-washer-card',
+      entity,
+    };
+  }
+
   /* ── Haptics & Feedback ── */
   private _haptic(type: 'light' | 'medium' | 'selection' | 'warning' = 'light'): void {
     window.dispatchEvent(new CustomEvent('haptic', { detail: type }));
@@ -118,8 +147,8 @@ export class IFBWasherCard extends LitElement {
 
   /* ── Entity Auto-Discovery & Prefix Resolution ── */
   private _resolveEntities() {
-    const rawId = this._config.entity;
-    const c = this._config;
+    const rawId = this._config?.entity || '';
+    const c = this._config || ({} as IFBWasherCardConfig);
 
     let power = c.power_switch;
     let start = c.start_button;
@@ -137,6 +166,27 @@ export class IFBWasherCard extends LitElement {
     let rpm = c.motor_speed_sensor;
     let door = c.door_locked_sensor;
     let problem = '';
+
+    if (!rawId) {
+      return {
+        power: power || '',
+        start: start || '',
+        pause: pause || '',
+        cancel: cancel || '',
+        program: program || '',
+        spin: spin || '',
+        temp: temp || '',
+        delay: delay || '',
+        childLock: childLock || '',
+        state: state || '',
+        remaining: remaining || '',
+        progress: progress || '',
+        tubTemp: tubTemp || '',
+        rpm: rpm || '',
+        door: door || '',
+        problem: '',
+      };
+    }
 
     // Smart Device-Level Companion Discovery via Home Assistant Entity Registry
     const reg = (this.hass as any)?.entities;
@@ -300,6 +350,18 @@ export class IFBWasherCard extends LitElement {
   public render() {
     if (!this.hass || !this._config) {
       return nothing;
+    }
+
+    if (!this._config.entity) {
+      return html`
+        <ha-card class="ifb-washer-card">
+          <div style="padding: 24px; text-align: center; color: var(--appliance-text-2, #8e8e93);">
+            <ha-icon icon="mdi:washing-machine" style="--mdc-icon-size: 40px; margin-bottom: 8px; opacity: 0.6;"></ha-icon>
+            <div style="font-weight: 500; font-size: 15px; color: var(--appliance-text-1, inherit);">IFB Washer Card</div>
+            <div style="font-size: 13px; margin-top: 4px;">Please select a Washer Entity in the card configuration editor.</div>
+          </div>
+        </ha-card>
+      `;
     }
 
     const entities = this._resolveEntities();
