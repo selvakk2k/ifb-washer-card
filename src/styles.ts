@@ -953,41 +953,63 @@ export const styles = css`
     opacity: 0.4;
     cursor: not-allowed;
   }
-  .gh-center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 16px 0;
+  /* ── M3 Open Circular Dial in Google Home View ── */
+  .gh-full-card .drum-porthole {
+    background: transparent;
+    border: none;
+    box-shadow: none;
   }
-  .gh-value-large {
-    font-size: 4.6rem;
-    font-weight: 400;
-    line-height: 1.1;
-    color: var(--appliance-text-1);
-    letter-spacing: -1px;
+  .gh-full-card .ring-track {
+    stroke: color-mix(in srgb, var(--appliance-text) 10%, transparent);
+    stroke-width: 6;
   }
-  .gh-subtitle-large {
-    font-size: 0.95rem;
-    font-weight: 500;
+  .gh-full-card .ring-progress {
+    stroke: var(--appliance-accent);
+    stroke-width: 6;
+    stroke-linecap: round;
+  }
+  .gh-full-card .dial-flank-icon-btn {
+    border: none;
+    background: color-mix(in srgb, var(--appliance-text) 8%, transparent);
     color: var(--appliance-text-2);
-    margin-top: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
+    box-shadow: none;
   }
-  .gh-mode-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 14px;
-    border-radius: 20px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--appliance-on-accent, #ffffff);
+  .gh-full-card .dial-flank:hover:not(.disabled):not(.runtime-flank) .dial-flank-icon-btn {
+    background: color-mix(in srgb, var(--appliance-text) 16%, transparent);
+    color: var(--appliance-text);
+  }
+  .gh-full-card .dial-flank-icon-btn.active {
     background: var(--appliance-accent);
-    letter-spacing: 0.02em;
+    color: var(--appliance-on-accent, #ffffff);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--appliance-accent) 40%, transparent);
+  }
+  .gh-full-card .porthole-phase {
+    border-radius: 12px;
+    padding: 3px 10px;
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    background: color-mix(in srgb, var(--appliance-accent) 18%, transparent);
+    color: var(--appliance-accent);
+  }
+  .gh-full-card .porthole-hero-time {
+    font-size: 2.1rem;
+    font-weight: 500;
+    color: var(--appliance-text);
+  }
+  .gh-full-card.is-off .porthole-hero-time {
+    color: var(--appliance-text-2);
+    opacity: 0.6;
+  }
+  .gh-full-card.is-off .dial-flank {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  .porthole-container.disabled {
+    opacity: 0.7;
+  }
+  .porthole-container.disabled .dial-flank {
+    opacity: 0.35;
+    pointer-events: none;
   }
   .gh-action-row {
     display: flex;

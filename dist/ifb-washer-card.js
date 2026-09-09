@@ -984,41 +984,63 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
     opacity: 0.4;
     cursor: not-allowed;
   }
-  .gh-center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 16px 0;
+  /* ── M3 Open Circular Dial in Google Home View ── */
+  .gh-full-card .drum-porthole {
+    background: transparent;
+    border: none;
+    box-shadow: none;
   }
-  .gh-value-large {
-    font-size: 4.6rem;
-    font-weight: 400;
-    line-height: 1.1;
-    color: var(--appliance-text-1);
-    letter-spacing: -1px;
+  .gh-full-card .ring-track {
+    stroke: color-mix(in srgb, var(--appliance-text) 10%, transparent);
+    stroke-width: 6;
   }
-  .gh-subtitle-large {
-    font-size: 0.95rem;
-    font-weight: 500;
+  .gh-full-card .ring-progress {
+    stroke: var(--appliance-accent);
+    stroke-width: 6;
+    stroke-linecap: round;
+  }
+  .gh-full-card .dial-flank-icon-btn {
+    border: none;
+    background: color-mix(in srgb, var(--appliance-text) 8%, transparent);
     color: var(--appliance-text-2);
-    margin-top: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
+    box-shadow: none;
   }
-  .gh-mode-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 14px;
-    border-radius: 20px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--appliance-on-accent, #ffffff);
+  .gh-full-card .dial-flank:hover:not(.disabled):not(.runtime-flank) .dial-flank-icon-btn {
+    background: color-mix(in srgb, var(--appliance-text) 16%, transparent);
+    color: var(--appliance-text);
+  }
+  .gh-full-card .dial-flank-icon-btn.active {
     background: var(--appliance-accent);
-    letter-spacing: 0.02em;
+    color: var(--appliance-on-accent, #ffffff);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--appliance-accent) 40%, transparent);
+  }
+  .gh-full-card .porthole-phase {
+    border-radius: 12px;
+    padding: 3px 10px;
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    background: color-mix(in srgb, var(--appliance-accent) 18%, transparent);
+    color: var(--appliance-accent);
+  }
+  .gh-full-card .porthole-hero-time {
+    font-size: 2.1rem;
+    font-weight: 500;
+    color: var(--appliance-text);
+  }
+  .gh-full-card.is-off .porthole-hero-time {
+    color: var(--appliance-text-2);
+    opacity: 0.6;
+  }
+  .gh-full-card.is-off .dial-flank {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  .porthole-container.disabled {
+    opacity: 0.7;
+  }
+  .porthole-container.disabled .dial-flank {
+    opacity: 0.35;
+    pointer-events: none;
   }
   .gh-action-row {
     display: flex;
@@ -1315,8 +1337,8 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
               </div>
             `:F}
       </div>
-    `}_renderGoogleHomeFull(e,t,i,o,s,a,n,r,l,c,p,d,h,u,m,g,f,v,b,_,y,w,x,$,k,P,D,C,S,T){const M=s?this._formatRemaining(l):i?n?"Done":"Standby":"Off",R=2*Math.PI*70,A=R-c/100*R,E=b>400,H=e.program?this.hass.states[e.program]:void 0,N=H?.attributes?.program_duration||me[p]||0;let z="--";return s?z=l>0?`${l} min`:"Running":N>0&&(z=`${N} min`),B`
-      <ha-card class="gh-full-card">
+    `}_renderGoogleHomeFull(e,t,i,o,s,a,n,r,l,c,p,d,h,u,m,g,f,v,b,_,y,w,x,$,k,P,D,C,S,T){const M=s?this._formatRemaining(l):i?n?"Done":"Standby":"Off",R=2*Math.PI*70,A=R-c/100*R,E=b>400,H=e.program?this.hass.states[e.program]:void 0,N=H?.attributes?.program_duration||me[p]||0;let z="--";s?z=l>0?`${l} min`:"Running":N>0&&(z=`${N} min`);const L=i?f?"Fault":s?r:n?"Done":p||"Standby":"";return B`
+      <ha-card class="gh-full-card ${i?"":"is-off"}">
         <!-- Header -->
         <div class="gh-header">
           <div class="gh-header-left">
@@ -1344,7 +1366,7 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
         </div>
 
         <!-- M3 Porthole & Radial Progress Dial with Flanks -->
-        <div class="porthole-container">
+        <div class="porthole-container ${i?"":"disabled"}">
           <!-- Left Flank: Child Lock -->
           <div
             class="dial-flank child-lock-flank ${m?"active":""} ${o&&i?"":"disabled"}"
@@ -1381,10 +1403,8 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
                 <div class="porthole-hero-time">
                   ${M}
                 </div>
-                <div class="porthole-phase">
-                  ${i?f?"Fault":s?r:p||r:"Standby"}
-                </div>
-                ${b>0||v>0?B`
+                ${i&&L?B`<div class="porthole-phase">${L}</div>`:F}
+                ${i&&(b>0||v>0)?B`
                       <div class="porthole-submetrics">
                         ${b>0?`${b} RPM`:""}
                         ${b>0&&v>0?" • ":""}
@@ -1623,9 +1643,9 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
               `:F}
         </div>
       </ha-card>
-    `}_renderFullBody(e,t,i,o,s,a,n,r,l,c,p,d,h,u,m,g,f,v,b,_,y,w,x,$,k,P,D,C,S,T,M,R){const A=y>400,E=e.program?this.hass.states[e.program]:void 0,H=E?.attributes?.program_duration||me[h]||0;let N="--";return o?N=r>0?`${r} min`:"Running":H>0&&(N=`${H} min`),B`
+    `}_renderFullBody(e,t,i,o,s,a,n,r,l,c,p,d,h,u,m,g,f,v,b,_,y,w,x,$,k,P,D,C,S,T,M,R){const A=y>400,E=e.program?this.hass.states[e.program]:void 0,H=E?.attributes?.program_duration||me[h]||0;let N="--";o?N=r>0?`${r} min`:"Running":H>0&&(N=`${H} min`);const z=o?this._formatRemaining(r):i?a?"Done":"Standby":"Off",L=i?b?"Fault":o?n:a?"Done":h||"Standby":"";return B`
       <!-- Porthole & Radial Progress Ring with Dial Flanks -->
-      <div class="porthole-container">
+      <div class="porthole-container ${i?"":"disabled"}">
         <!-- Left Flank: Child Lock -->
         <div
           class="dial-flank child-lock-flank ${f?"active":""} ${t&&i?"":"disabled"}"
@@ -1660,12 +1680,10 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
             ${o?B`<div class="drum-baffles ${A?"fast-spin":"spinning"}"></div>`:F}
             <div class="porthole-content">
               <div class="porthole-hero-time">
-                ${o?this._formatRemaining(r):i?a?"Done":"00:00":"Off"}
+                ${z}
               </div>
-              <div class="porthole-phase">
-                ${i?b?"Fault":n:"Standby"}
-              </div>
-              ${y>0||_>0?B`
+              ${i&&L?B`<div class="porthole-phase">${L}</div>`:F}
+              ${i&&(y>0||_>0)?B`
                     <div class="porthole-submetrics">
                       ${y>0?`${y} RPM`:""}
                       ${y>0&&_>0?" • ":""}

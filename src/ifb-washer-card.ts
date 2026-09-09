@@ -1403,8 +1403,18 @@ export class IFBWasherCard extends LitElement {
       runTimeDisplay = `${nominalDuration} min`;
     }
 
+    const phaseDisplay = !isOn
+      ? ''
+      : hasProblem
+      ? 'Fault'
+      : isRunning
+      ? machineState
+      : isComplete
+      ? 'Done'
+      : (currentProgram || 'Standby');
+
     return html`
-      <ha-card class="gh-full-card">
+      <ha-card class="gh-full-card ${!isOn ? 'is-off' : ''}">
         <!-- Header -->
         <div class="gh-header">
           <div class="gh-header-left">
@@ -1438,7 +1448,7 @@ export class IFBWasherCard extends LitElement {
         </div>
 
         <!-- M3 Porthole & Radial Progress Dial with Flanks -->
-        <div class="porthole-container">
+        <div class="porthole-container ${!isOn ? 'disabled' : ''}">
           <!-- Left Flank: Child Lock -->
           <div
             class="dial-flank child-lock-flank ${isChildLockActive ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
@@ -1491,10 +1501,10 @@ export class IFBWasherCard extends LitElement {
                 <div class="porthole-hero-time">
                   ${displayValue}
                 </div>
-                <div class="porthole-phase">
-                  ${!isOn ? 'Standby' : hasProblem ? 'Fault' : isRunning ? machineState : currentProgram || machineState}
-                </div>
-                ${motorRpm > 0 || tubTemp > 0
+                ${isOn && phaseDisplay
+                  ? html`<div class="porthole-phase">${phaseDisplay}</div>`
+                  : nothing}
+                ${isOn && (motorRpm > 0 || tubTemp > 0)
                   ? html`
                       <div class="porthole-submetrics">
                         ${motorRpm > 0 ? `${motorRpm} RPM` : ''}
@@ -1942,9 +1952,27 @@ export class IFBWasherCard extends LitElement {
       runTimeDisplay = `${nominalDuration} min`;
     }
 
+    const displayValue = isRunning
+      ? this._formatRemaining(remMinutes)
+      : !isOn
+      ? 'Off'
+      : isComplete
+      ? 'Done'
+      : 'Standby';
+
+    const phaseDisplay = !isOn
+      ? ''
+      : hasProblem
+      ? 'Fault'
+      : isRunning
+      ? machineState
+      : isComplete
+      ? 'Done'
+      : (currentProgram || 'Standby');
+
     return html`
       <!-- Porthole & Radial Progress Ring with Dial Flanks -->
-      <div class="porthole-container">
+      <div class="porthole-container ${!isOn ? 'disabled' : ''}">
         <!-- Left Flank: Child Lock -->
         <div
           class="dial-flank child-lock-flank ${isChildLockActive ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
@@ -1995,18 +2023,12 @@ export class IFBWasherCard extends LitElement {
               : nothing}
             <div class="porthole-content">
               <div class="porthole-hero-time">
-                ${isRunning
-                  ? this._formatRemaining(remMinutes)
-                  : !isOn
-                  ? 'Off'
-                  : isComplete
-                  ? 'Done'
-                  : '00:00'}
+                ${displayValue}
               </div>
-              <div class="porthole-phase">
-                ${!isOn ? 'Standby' : hasProblem ? 'Fault' : machineState}
-              </div>
-              ${motorRpm > 0 || tubTemp > 0
+              ${isOn && phaseDisplay
+                ? html`<div class="porthole-phase">${phaseDisplay}</div>`
+                : nothing}
+              ${isOn && (motorRpm > 0 || tubTemp > 0)
                 ? html`
                     <div class="porthole-submetrics">
                       ${motorRpm > 0 ? `${motorRpm} RPM` : ''}
