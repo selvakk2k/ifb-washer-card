@@ -845,13 +845,18 @@ export const styles = css`
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    width: 100%;
   }
   .modifier-chip {
+    flex: 1 1 calc(33.333% - 8px);
+    min-width: 95px;
+    height: 40px;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    padding: 7px 12px;
-    border-radius: 14px;
+    padding: 0 10px;
+    border-radius: 12px;
     border: 1px solid var(--appliance-border);
     background: var(--appliance-surface);
     color: var(--appliance-text);
@@ -860,7 +865,8 @@ export const styles = css`
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    flex-shrink: 0;
+    box-sizing: border-box;
+    text-align: center;
   }
   .modifier-chip:hover:not(.disabled) {
     background: var(--appliance-surface-hover);

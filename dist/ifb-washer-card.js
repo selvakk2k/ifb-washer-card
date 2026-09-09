@@ -876,13 +876,18 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    width: 100%;
   }
   .modifier-chip {
+    flex: 1 1 calc(33.333% - 8px);
+    min-width: 95px;
+    height: 40px;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    padding: 7px 12px;
-    border-radius: 14px;
+    padding: 0 10px;
+    border-radius: 12px;
     border: 1px solid var(--appliance-border);
     background: var(--appliance-surface);
     color: var(--appliance-text);
@@ -891,7 +896,8 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    flex-shrink: 0;
+    box-sizing: border-box;
+    text-align: center;
   }
   .modifier-chip:hover:not(.disabled) {
     background: var(--appliance-surface-hover);
@@ -1150,7 +1156,6 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
         <div class="header">
           <div class="header-left">
             <div class="title-row">
-              <ha-icon class="header-icon" icon="mdi:washing-machine"></ha-icon>
               <div class="title">${A}</div>
             </div>
             <div class="subtitle">${H}</div>
@@ -1213,7 +1218,7 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
               `:F}
         </div>
       </ha-card>
-    `}_renderCompactCard(e,t,i,o,s,a,r,n,l,c,p,d){const h="google_home"===this._config.full_layout?"google-home":"classic",u=s?n>0?this._formatRemaining(n):`${l}%`:a?"Paused":o?"Ready":"Off";return B`
+    `}_renderCompactCard(e,t,i,o,s,a,r,n,l,c,p,d){const h="google_home"===this._config.full_layout?"google-home":"classic",u=s?n>0?this._formatRemaining(n):`${l}%`:a?"Paused":o?"Standby":"Off";return B`
       <ha-card
         class="compact-card ${h}"
         @click=${()=>{this._haptic("selection"),this._expanded=!0}}
@@ -1306,7 +1311,6 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
         <!-- Header -->
         <div class="gh-header">
           <div class="gh-header-left">
-            <ha-icon class="gh-icon" icon="mdi:washing-machine"></ha-icon>
             <div class="gh-title">${t}</div>
           </div>
           <div style="display: flex; gap: 8px; align-items: center;">
@@ -1762,7 +1766,7 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
       <!-- Expandable Options Picker Panel -->
       ${"program"===this._openPanel?B`
             <div class="picker-panel">
-              ${(w.length>0?w:["Mix / Daily","Cotton","Express 15'","Tub Clean"]).map(s=>{const a=ge[s]||"";return B`
+              ${(w.length>0?w:["Mix / Daily","Cotton","Express 15'","Tub Clean","Spin Dry / Drain","Rinse + Spin"]).map(s=>{const a=ge[s]||"";return B`
                   <button
                     class="picker-opt ${h===s?"sel":""}"
                     title="${a?`${s} — ${a}`:s}"

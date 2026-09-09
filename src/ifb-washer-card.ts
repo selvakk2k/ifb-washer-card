@@ -1011,7 +1011,6 @@ export class IFBWasherCard extends LitElement {
         <div class="header">
           <div class="header-left">
             <div class="title-row">
-              <ha-icon class="header-icon" icon="mdi:washing-machine"></ha-icon>
               <div class="title">${title}</div>
             </div>
             <div class="subtitle">${subtitle}</div>
@@ -1142,7 +1141,7 @@ export class IFBWasherCard extends LitElement {
     const layoutClass = this._config.full_layout === 'google_home' ? 'google-home' : 'classic';
     const displayValue = isRunning
       ? (remMinutes > 0 ? this._formatRemaining(remMinutes) : `${progressPct}%`)
-      : (isPaused ? 'Paused' : isOn ? 'Ready' : 'Off');
+      : (isPaused ? 'Paused' : isOn ? 'Standby' : 'Off');
 
     return html`
       <ha-card
@@ -1393,7 +1392,6 @@ export class IFBWasherCard extends LitElement {
         <!-- Header -->
         <div class="gh-header">
           <div class="gh-header-left">
-            <ha-icon class="gh-icon" icon="mdi:washing-machine"></ha-icon>
             <div class="gh-title">${title}</div>
           </div>
           <div style="display: flex; gap: 8px; align-items: center;">
@@ -2201,7 +2199,7 @@ export class IFBWasherCard extends LitElement {
             <div class="picker-panel">
               ${(programOptions.length > 0
                 ? programOptions
-                : ['Mix / Daily', 'Cotton', 'Express 15\'', 'Tub Clean']
+                : ['Mix / Daily', 'Cotton', 'Express 15\'', 'Tub Clean', 'Spin Dry / Drain', 'Rinse + Spin']
               ).map((prog) => {
                 const isSelected = currentProgram === prog;
                 const progDesc = HELP_DESCRIPTIONS[prog] || '';
