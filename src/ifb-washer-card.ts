@@ -1385,7 +1385,7 @@ export class IFBWasherCard extends LitElement {
       ? 'Off'
       : isComplete
       ? 'Done'
-      : 'Ready';
+      : 'Standby';
 
     return html`
       <ha-card class="gh-full-card">
@@ -1426,12 +1426,18 @@ export class IFBWasherCard extends LitElement {
           <div class="gh-value-large">${displayValue}</div>
           <div class="gh-subtitle-large">
             <div>
-              ${machineState}${tubTemp > 0 ? ` • ${tubTemp}°C` : ''}${motorRpm > 0 ? ` • ${motorRpm} RPM` : ''}
+              ${isRunning
+                ? `${machineState}${tubTemp > 0 ? ` • ${tubTemp}°C` : ''}${motorRpm > 0 ? ` • ${motorRpm} RPM` : ''}`
+                : isOn
+                ? `${currentProgram || 'Select Program'}${currentTemp && currentTemp !== 'None' ? ` • ${currentTemp}` : ''}${currentSpin && currentSpin !== 'None' ? ` • ${currentSpin}` : ''}`
+                : 'Washer is turned off'}
             </div>
             ${isOn
               ? html`
                   <div class="gh-mode-pill">
-                    ${isRunning ? machineState : currentProgram || 'Standby'}
+                    ${isRunning
+                      ? (currentProgram || machineState)
+                      : (PROGRAM_DURATIONS[currentProgram] ? `${PROGRAM_DURATIONS[currentProgram]} min` : currentProgram || 'Standby')}
                   </div>
                 `
               : nothing}

@@ -159,13 +159,13 @@ export const styles = css`
     --mdc-icon-size: 20px;
   }
 
-  /* ── Porthole & Drum Progress Ring ── */
+  /* ── Material Design 3 Porthole & Drum Progress Ring ── */
   .porthole-container {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-around;
-    margin: 12px 0 16px;
+    margin: 14px 0 18px;
     position: relative;
     width: 100%;
   }
@@ -175,10 +175,10 @@ export const styles = css`
     align-items: center;
     justify-content: center;
     gap: 4px;
-    min-width: 68px;
+    min-width: 72px;
     cursor: pointer;
     user-select: none;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .dial-flank.runtime-flank {
     cursor: default;
@@ -188,16 +188,17 @@ export const styles = css`
     cursor: not-allowed;
   }
   .dial-flank-icon-btn {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    border: 1px solid var(--appliance-border);
+    border: 1.5px solid var(--appliance-border);
     background: var(--appliance-surface);
     color: var(--appliance-text-2);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
   .dial-flank-icon-btn ha-icon {
     --mdc-icon-size: 20px;
@@ -205,6 +206,9 @@ export const styles = css`
   .dial-flank:hover:not(.disabled):not(.runtime-flank) .dial-flank-icon-btn {
     background: var(--appliance-surface-hover);
     color: var(--appliance-text);
+  }
+  .dial-flank:active:not(.disabled):not(.runtime-flank) .dial-flank-icon-btn {
+    transform: scale(0.94);
   }
   .dial-flank-icon-btn.active {
     background: var(--appliance-accent);
@@ -214,15 +218,15 @@ export const styles = css`
   }
   .dial-flank-label {
     font-size: 0.72rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--appliance-text-2);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     margin-top: 2px;
   }
   .dial-flank-status {
     font-size: 0.82rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--appliance-text);
   }
   .dial-flank.active .dial-flank-status {
@@ -264,7 +268,7 @@ export const styles = css`
     height: 140px;
     border-radius: 50%;
     background: var(--appliance-surface);
-    border: 1px solid var(--appliance-border);
+    border: 1.5px solid var(--appliance-border);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -320,24 +324,25 @@ export const styles = css`
     padding: 6px;
   }
   .porthole-hero-time {
-    font-size: 1.85rem;
-    font-weight: 700;
+    font-size: 1.95rem;
+    font-weight: 600;
     line-height: 1.1;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.02em;
+    color: var(--appliance-text);
   }
   .porthole-phase {
-    font-size: 0.72rem;
+    font-size: 0.74rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.06em;
     margin-top: 4px;
     color: var(--appliance-accent);
     padding: 2px 8px;
-    border-radius: 12px;
+    border-radius: 10px;
     background: color-mix(in srgb, var(--appliance-accent) 15%, transparent);
   }
   .porthole-submetrics {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-weight: 600;
     color: var(--appliance-text-2);
     margin-top: 3px;
