@@ -1439,6 +1439,20 @@ export class IFBWasherCard extends LitElement {
       ? 'Done'
       : (currentProgram || '');
 
+    const submetricsDisplay = (() => {
+      if (!isOn) return null;
+      const parts: string[] = [];
+      if (currentTemp && currentTemp !== 'None' && currentTemp !== 'none') {
+        parts.push(currentTemp);
+      }
+      if (isRunning && motorRpm > 0) {
+        parts.push(`${motorRpm} RPM`);
+      } else if (currentSpin && currentSpin !== 'None' && currentSpin !== 'none') {
+        parts.push(currentSpin);
+      }
+      return parts.length > 0 ? parts.join(' • ') : null;
+    })();
+
     return html`
       <ha-card class="gh-full-card ${!isOn ? 'is-off' : ''}">
         <!-- Header -->
@@ -1530,10 +1544,10 @@ export class IFBWasherCard extends LitElement {
                 ${isOn && phaseDisplay
                   ? html`<div class="porthole-phase">${phaseDisplay}</div>`
                   : nothing}
-                ${isOn && isRunning && motorRpm > 0
+                ${submetricsDisplay
                   ? html`
                       <div class="porthole-submetrics">
-                        ${motorRpm} RPM
+                        ${submetricsDisplay}
                       </div>
                     `
                   : nothing}
@@ -1989,6 +2003,20 @@ export class IFBWasherCard extends LitElement {
       ? 'Done'
       : (currentProgram || 'Standby');
 
+    const submetricsDisplay = (() => {
+      if (!isOn) return null;
+      const parts: string[] = [];
+      if (currentTemp && currentTemp !== 'None' && currentTemp !== 'none') {
+        parts.push(currentTemp);
+      }
+      if (isRunning && motorRpm > 0) {
+        parts.push(`${motorRpm} RPM`);
+      } else if (currentSpin && currentSpin !== 'None' && currentSpin !== 'none') {
+        parts.push(currentSpin);
+      }
+      return parts.length > 0 ? parts.join(' • ') : null;
+    })();
+
     return html`
       <!-- Porthole & Radial Progress Ring with Dial Flanks -->
       <div class="porthole-container ${!isOn ? 'disabled' : ''}">
@@ -2047,10 +2075,10 @@ export class IFBWasherCard extends LitElement {
               ${isOn && phaseDisplay
                 ? html`<div class="porthole-phase">${phaseDisplay}</div>`
                 : nothing}
-              ${isOn && isRunning && motorRpm > 0
+              ${submetricsDisplay
                 ? html`
                     <div class="porthole-submetrics">
-                      ${motorRpm} RPM
+                      ${submetricsDisplay}
                     </div>
                   `
                 : nothing}

@@ -1365,7 +1365,7 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
               </div>
             `:F}
       </div>
-    `}_renderGoogleHomeFull(e,t,i,o,s,a,r,n,l,c,p,d,h,u,m,g,f,v,b,_,y,w,x,$,k,P,D,S,C,T){const M=e.program?this.hass.states[e.program]:void 0,R=M?.attributes?.program_duration||me[p]||0;let A="--";s?A=l>0?`${l} min`:"Running":R>0&&(A=`${R} min`);const E=s?this._formatRemaining(l):i?r?"Done":R>0?`${R} min`:"Standby":"Off",H=2*Math.PI*70,N=H-c/100*H,z=b>400,O=i?f?"Fault":s?n:r?"Done":p||"":"";return B`
+    `}_renderGoogleHomeFull(e,t,i,o,s,a,r,n,l,c,p,d,h,u,m,g,f,v,b,_,y,w,x,$,k,P,D,S,C,T){const M=e.program?this.hass.states[e.program]:void 0,R=M?.attributes?.program_duration||me[p]||0;let A="--";s?A=l>0?`${l} min`:"Running":R>0&&(A=`${R} min`);const E=s?this._formatRemaining(l):i?r?"Done":R>0?`${R} min`:"Standby":"Off",H=2*Math.PI*70,N=H-c/100*H,z=b>400,O=i?f?"Fault":s?n:r?"Done":p||"":"",L=(()=>{if(!i)return null;const e=[];return h&&"None"!==h&&"none"!==h&&e.push(h),s&&b>0?e.push(`${b} RPM`):d&&"None"!==d&&"none"!==d&&e.push(d),e.length>0?e.join(" • "):null})();return B`
       <ha-card class="gh-full-card ${i?"":"is-off"}">
         <!-- Header -->
         <div class="gh-header">
@@ -1432,9 +1432,9 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
                   ${E}
                 </div>
                 ${i&&O?B`<div class="porthole-phase">${O}</div>`:F}
-                ${i&&s&&b>0?B`
+                ${L?B`
                       <div class="porthole-submetrics">
-                        ${b} RPM
+                        ${L}
                       </div>
                     `:F}
               </div>
@@ -1666,7 +1666,7 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
               `:F}
         </div>
       </ha-card>
-    `}_renderFullBody(e,t,i,o,s,a,r,n,l,c,p,d,h,u,m,g,f,v,b,_,y,w,x,$,k,P,D,S,C,T,M,R){const A=y>400,E=e.program?this.hass.states[e.program]:void 0,H=E?.attributes?.program_duration||me[h]||0;let N="--";o?N=n>0?`${n} min`:"Running":H>0&&(N=`${H} min`);const z=o?this._formatRemaining(n):i?a?"Done":H>0?`${H} min`:"Standby":"Off",O=i?b?"Fault":o?r:a?"Done":h||"Standby":"";return B`
+    `}_renderFullBody(e,t,i,o,s,a,r,n,l,c,p,d,h,u,m,g,f,v,b,_,y,w,x,$,k,P,D,S,C,T,M,R){const A=y>400,E=e.program?this.hass.states[e.program]:void 0,H=E?.attributes?.program_duration||me[h]||0;let N="--";o?N=n>0?`${n} min`:"Running":H>0&&(N=`${H} min`);const z=o?this._formatRemaining(n):i?a?"Done":H>0?`${H} min`:"Standby":"Off",O=i?b?"Fault":o?r:a?"Done":h||"Standby":"",L=(()=>{if(!i)return null;const e=[];return m&&"None"!==m&&"none"!==m&&e.push(m),o&&y>0?e.push(`${y} RPM`):u&&"None"!==u&&"none"!==u&&e.push(u),e.length>0?e.join(" • "):null})();return B`
       <!-- Porthole & Radial Progress Ring with Dial Flanks -->
       <div class="porthole-container ${i?"":"disabled"}">
         <!-- Left Flank: Child Lock -->
@@ -1706,9 +1706,9 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
                 ${z}
               </div>
               ${i&&O?B`<div class="porthole-phase">${O}</div>`:F}
-              ${i&&o&&y>0?B`
+              ${L?B`
                     <div class="porthole-submetrics">
-                      ${y} RPM
+                      ${L}
                     </div>
                   `:F}
             </div>
