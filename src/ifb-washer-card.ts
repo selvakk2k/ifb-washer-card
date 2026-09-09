@@ -492,6 +492,19 @@ export class IFBWasherCard extends LitElement {
     );
   }
 
+  private _resolveStaticCapabilities(programName: string) {
+    if (!programName) return {};
+    const clean = programName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    for (const [key, caps] of Object.entries(PROGRAM_CAPABILITIES)) {
+      const cleanKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (cleanKey === clean || cleanKey.includes(clean) || clean.includes(cleanKey)) {
+        return caps;
+      }
+    }
+    return PROGRAM_CAPABILITIES[programName] || {};
+  }
+
+
   /* ── Entity Auto-Discovery & Prefix Resolution ── */
   private _resolveEntities() {
     let rawId = this._config?.entity || '';
@@ -502,6 +515,7 @@ export class IFBWasherCard extends LitElement {
     let pause = c.pause_button;
     let cancel = c.cancel_button;
     let program = c.program_select;
+    let programSensor = c.program_sensor;
     let spin = c.spin_select;
     let temp = c.temperature_select;
     let delay = c.delay_select;
@@ -548,6 +562,7 @@ export class IFBWasherCard extends LitElement {
         pause: pause || '',
         cancel: cancel || '',
         program: program || '',
+        programSensor: programSensor || '',
         spin: spin || '',
         temp: temp || '',
         delay: delay || '',
@@ -587,6 +602,7 @@ export class IFBWasherCard extends LitElement {
           if (!pause && (u.endsWith('_pause') || t === 'pause')) pause = id;
           if (!cancel && (u.endsWith('_cancel') || t === 'cancel')) cancel = id;
           if (!program && (u.endsWith('_program_select') || t === 'program_select')) program = id;
+          if (!programSensor && (u.endsWith('_program') || t === 'program') && !u.endsWith('_program_select') && !u.endsWith('_program_duration')) programSensor = id;
           if (!spin && (u.endsWith('_spin_speed_select') || t === 'spin_speed_select')) spin = id;
           if (!temp && (u.endsWith('_temperature_select') || t === 'temperature_select')) temp = id;
           if (!delay && (u.endsWith('_delay_start_select') || t === 'delay_start_select')) delay = id;
@@ -630,6 +646,7 @@ export class IFBWasherCard extends LitElement {
       '_pause',
       '_cancel',
       '_program_select',
+      '_program',
       '_spin_speed_select',
       '_temperature_select',
       '_delay_start_select',
@@ -665,9 +682,11 @@ export class IFBWasherCard extends LitElement {
       pause: pause || (prefix ? `button.${prefix}_pause` : ''),
       cancel: cancel || (prefix ? `button.${prefix}_cancel` : ''),
       program: program || (prefix ? `select.${prefix}_program_select` : ''),
+      programSensor: programSensor || (prefix ? `sensor.${prefix}_program` : ''),
       spin: spin || (prefix ? `select.${prefix}_spin_speed_select` : ''),
       temp: temp || (prefix ? `select.${prefix}_temperature_select` : ''),
       delay: delay || (prefix ? `select.${prefix}_delay_start_select` : ''),
+
       extraRinse: extraRinse || (prefix ? `select.${prefix}_extra_rinse` : ''),
       dryMode: dryMode || (prefix ? `select.${prefix}_dry_mode` : ''),
       prewash: prewash || (prefix ? `switch.${prefix}_prewash` : ''),
@@ -789,7 +808,11 @@ export class IFBWasherCard extends LitElement {
     const machineStateObj = entities.state ? this.hass.states[entities.state] : undefined;
     const remainingObj = entities.remaining ? this.hass.states[entities.remaining] : undefined;
     const progressObj = entities.progress ? this.hass.states[entities.progress] : undefined;
-    const programObj = entities.program ? this.hass.states[entities.program] : undefined;
+    const programObj =
+      (entities.programSensor ? this.hass.states[entities.programSensor] : undefined) ||
+      (entities.program ? this.hass.states[entities.program] : undefined);
+
+
     const spinObj = entities.spin ? this.hass.states[entities.spin] : undefined;
     const tempObj = entities.temp ? this.hass.states[entities.temp] : undefined;
     const delayObj = entities.delay ? this.hass.states[entities.delay] : undefined;
@@ -876,7 +899,11 @@ export class IFBWasherCard extends LitElement {
       subtitle = parts.join(' • ');
     }
 
-    const programOptions = (programObj?.attributes?.options as string[]) || [];
+    const programSelectObj = entities.program ? this.hass.states[entities.program] : undefined;
+    const programSensorObj = entities.programSensor ? this.hass.states[entities.programSensor] : undefined;
+
+    const programOptions = (programSelectObj?.attributes?.options as string[]) || (programObj?.attributes?.options as string[]) || [];
+
     const spinOptions = (spinObj?.attributes?.options as string[]) || [];
     const tempOptions = (tempObj?.attributes?.options as string[]) || [];
     const delayOptions = (delayObj?.attributes?.options as string[]) || [];
@@ -888,12 +915,18 @@ export class IFBWasherCard extends LitElement {
     const extraRinseOptions = (extraRinseObj?.attributes?.options as string[]) || [];
     const dryModeOptions = (dryModeObj?.attributes?.options as string[]) || [];
 
-    // Capabilities per Official Wash Guide Map
-    const progCaps = (programObj?.attributes || {}) as Record<string, any>;
-    const staticCaps = PROGRAM_CAPABILITIES[currentProgram] || {};
-    const allowedTemps: string[] | undefined = progCaps.allowed_temps || staticCaps.allowedTemps;
-    const allowedSpins: string[] | undefined = progCaps.allowed_spins || staticCaps.allowedSpins;
-    const allowedDryModes: string[] | undefined = progCaps.allowed_dry_modes || staticCaps.allowedDryModes;
+    // Capabilities per Official Wash Guide Map & Database
+    const progCaps = (programSensorObj?.attributes || programSelectObj?.attributes || {}) as Record<string, any>;
+    const staticCaps = this._resolveStaticCapabilities(currentProgram);
+    const allowedTemps: string[] | undefined = (Array.isArray(progCaps.allowed_temps) && progCaps.allowed_temps.length > 0)
+      ? progCaps.allowed_temps
+      : staticCaps.allowedTemps;
+    const allowedSpins: string[] | undefined = (Array.isArray(progCaps.allowed_spins) && progCaps.allowed_spins.length > 0)
+      ? progCaps.allowed_spins
+      : staticCaps.allowedSpins;
+    const allowedDryModes: string[] | undefined = (Array.isArray(progCaps.allowed_dry_modes) && progCaps.allowed_dry_modes.length > 0)
+      ? progCaps.allowed_dry_modes
+      : staticCaps.allowedDryModes;
     const supportsDry: boolean = progCaps.supports_dry ?? (allowedDryModes ? allowedDryModes.length > 1 : staticCaps.supportsDry ?? true);
     const supportsSteam: boolean = progCaps.supports_steam ?? staticCaps.supportsSteam ?? true;
     const supportsPrewash: boolean = progCaps.supports_prewash ?? staticCaps.supportsPrewash ?? true;
@@ -953,20 +986,21 @@ export class IFBWasherCard extends LitElement {
 
     const filteredTempOptions = allowedTemps && allowedTemps.length > 0
       ? tempOptions.filter((t) =>
-          allowedTemps.some((at) => t.toLowerCase().includes(at.toLowerCase()) || at.toLowerCase().includes(t.toLowerCase()))
+          allowedTemps.some((at) => t.toLowerCase().replace(/[^a-z0-9]/g, '') === at.toLowerCase().replace(/[^a-z0-9]/g, ''))
         )
       : tempOptions;
     const filteredSpinOptions = allowedSpins && allowedSpins.length > 0
       ? spinOptions.filter((s) =>
-          allowedSpins.some((as) => s.toLowerCase().includes(as.toLowerCase()) || as.toLowerCase().includes(s.toLowerCase()))
+          allowedSpins.some((as) => s.toLowerCase().replace(/[^a-z0-9]/g, '') === as.toLowerCase().replace(/[^a-z0-9]/g, ''))
         )
       : spinOptions;
 
-    const effectiveTempOptions = filteredTempOptions.length > 0 ? filteredTempOptions : (allowedTemps || []);
-    const effectiveSpinOptions = filteredSpinOptions.length > 0 ? filteredSpinOptions : (allowedSpins || []);
+    const effectiveTempOptions = (filteredTempOptions.length > 0 ? filteredTempOptions : allowedTemps) || tempOptions;
+    const effectiveSpinOptions = (filteredSpinOptions.length > 0 ? filteredSpinOptions : allowedSpins) || spinOptions;
 
     if (this._config.full_layout === 'google_home') {
       return this._renderGoogleHomeFull(
+
         entities,
         title,
         isOn,

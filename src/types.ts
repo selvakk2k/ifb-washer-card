@@ -15,7 +15,9 @@ export interface IFBWasherCardConfig {
   pause_button?: string;
   cancel_button?: string;
   program_select?: string;
+  program_sensor?: string;
   spin_select?: string;
+
   temperature_select?: string;
   delay_select?: string;
   child_lock_switch?: string;
