@@ -606,8 +606,8 @@ export class IFBWasherCard extends LitElement {
           if (!spin && (u.endsWith('_spin_speed_select') || t === 'spin_speed_select')) spin = id;
           if (!temp && (u.endsWith('_temperature_select') || t === 'temperature_select')) temp = id;
           if (!delay && (u.endsWith('_delay_start_select') || t === 'delay_start_select')) delay = id;
-          if (!extraRinse && (u.endsWith('_extra_rinse') || t === 'extra_rinse')) extraRinse = id;
-          if (!dryMode && (u.endsWith('_dry_mode') || t === 'dry_mode')) dryMode = id;
+          if (!extraRinse && (u.endsWith('_extra_rinse_select') || u.endsWith('_extra_rinse') || t === 'extra_rinse_select' || t === 'extra_rinse')) extraRinse = id;
+          if (!dryMode && (u.endsWith('_dry_mode_select') || u.endsWith('_dry_mode') || t === 'dry_mode_select' || t === 'dry_mode')) dryMode = id;
           if (!prewash && (u.endsWith('_prewash') || t === 'prewash')) prewash = id;
           if (!soak && (u.endsWith('_soak') || t === 'soak')) soak = id;
           if (!rinseHold && (u.endsWith('_rinse_hold') || t === 'rinse_hold')) rinseHold = id;
@@ -650,7 +650,9 @@ export class IFBWasherCard extends LitElement {
       '_spin_speed_select',
       '_temperature_select',
       '_delay_start_select',
+      '_extra_rinse_select',
       '_extra_rinse',
+      '_dry_mode_select',
       '_dry_mode',
       '_prewash',
       '_soak',
@@ -687,8 +689,8 @@ export class IFBWasherCard extends LitElement {
       temp: temp || (prefix ? `select.${prefix}_temperature_select` : ''),
       delay: delay || (prefix ? `select.${prefix}_delay_start_select` : ''),
 
-      extraRinse: extraRinse || (prefix ? `select.${prefix}_extra_rinse` : ''),
-      dryMode: dryMode || (prefix ? `select.${prefix}_dry_mode` : ''),
+      extraRinse: extraRinse || (prefix ? `select.${prefix}_extra_rinse_select` : ''),
+      dryMode: dryMode || (prefix ? `select.${prefix}_dry_mode_select` : ''),
       prewash: prewash || (prefix ? `switch.${prefix}_prewash` : ''),
       soak: soak || (prefix ? `switch.${prefix}_soak` : ''),
       rinseHold: rinseHold || (prefix ? `switch.${prefix}_rinse_hold` : ''),
