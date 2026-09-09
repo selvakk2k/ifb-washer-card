@@ -955,9 +955,9 @@ export const styles = css`
   }
   /* ── M3 Open Circular Dial in Google Home View ── */
   .gh-full-card .drum-porthole {
-    background: transparent;
-    border: none;
-    box-shadow: none;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
   }
   .gh-full-card .ring-track {
     stroke: color-mix(in srgb, var(--appliance-text) 10%, transparent);
@@ -1013,18 +1013,70 @@ export const styles = css`
   }
   .gh-action-row {
     display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 28px;
+    padding: 6px 0 20px 0;
+  }
+  .gh-action-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .gh-action-circle {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--appliance-text) 8%, transparent);
+    border: none;
+    color: var(--appliance-text);
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 18px;
-    padding: 6px 0 18px 0;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  .gh-action-circle:hover:not(.disabled) {
+    background: color-mix(in srgb, var(--appliance-text) 16%, transparent);
+    transform: translateY(-1px);
+  }
+  .gh-action-circle:active:not(.disabled) {
+    transform: scale(0.94);
+  }
+  .gh-action-circle.primary {
+    background: var(--appliance-accent);
+    color: var(--appliance-on-accent, #ffffff);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--appliance-accent) 40%, transparent);
+  }
+  .gh-action-circle.active {
+    background: var(--appliance-active-bg, color-mix(in srgb, var(--appliance-accent) 25%, transparent));
+    color: var(--appliance-accent);
+    border: 1.5px solid var(--appliance-accent);
+  }
+  .gh-action-circle.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .gh-action-circle ha-icon {
+    --mdc-icon-size: 24px;
+  }
+  .gh-action-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--appliance-text-2);
+    letter-spacing: 0.02em;
+    text-transform: capitalize;
   }
   .gh-circular-btn {
-    width: 60px;
-    height: 60px;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
-    background: rgba(128, 128, 128, 0.15);
+    background: color-mix(in srgb, var(--appliance-text) 8%, transparent);
     border: none;
-    color: var(--appliance-text-1);
+    color: var(--appliance-text);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1034,25 +1086,10 @@ export const styles = css`
     outline: none;
     gap: 2px;
   }
-  .gh-circular-btn:hover:not(.disabled) {
-    background: rgba(128, 128, 128, 0.25);
-  }
-  .gh-circular-btn:active:not(.disabled) {
-    transform: scale(0.95);
-  }
   .gh-circular-btn.primary {
     background: var(--appliance-accent);
     color: var(--appliance-on-accent, #ffffff);
     box-shadow: 0 4px 14px color-mix(in srgb, var(--appliance-accent) 40%, transparent);
-  }
-  .gh-circular-btn.active {
-    background: var(--appliance-active-bg, rgba(38, 166, 154, 0.25));
-    color: var(--appliance-accent);
-    border: 1px solid var(--appliance-accent);
-  }
-  .gh-circular-btn.disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
   }
   .gh-circular-btn ha-icon {
     --mdc-icon-size: 24px;

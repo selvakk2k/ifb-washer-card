@@ -1379,18 +1379,6 @@ export class IFBWasherCard extends LitElement {
       blockedReason?: string;
     }>
   ) {
-    const displayValue = isRunning
-      ? this._formatRemaining(remMinutes)
-      : !isOn
-      ? 'Off'
-      : isComplete
-      ? 'Done'
-      : 'Standby';
-
-    const radius = 70;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference - (progressPct / 100) * circumference;
-    const isSpinningFast = motorRpm > 400;
     const programObj = entities.program ? this.hass.states[entities.program] : undefined;
     const nominalDuration =
       (programObj?.attributes?.program_duration as number) ||
@@ -1403,6 +1391,21 @@ export class IFBWasherCard extends LitElement {
       runTimeDisplay = `${nominalDuration} min`;
     }
 
+    const displayValue = isRunning
+      ? this._formatRemaining(remMinutes)
+      : !isOn
+      ? 'Off'
+      : isComplete
+      ? 'Done'
+      : nominalDuration > 0
+      ? `${nominalDuration} min`
+      : 'Standby';
+
+    const radius = 70;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (progressPct / 100) * circumference;
+    const isSpinningFast = motorRpm > 400;
+
     const phaseDisplay = !isOn
       ? ''
       : hasProblem
@@ -1411,7 +1414,7 @@ export class IFBWasherCard extends LitElement {
       ? machineState
       : isComplete
       ? 'Done'
-      : (currentProgram || 'Standby');
+      : (currentProgram || '');
 
     return html`
       <ha-card class="gh-full-card ${!isOn ? 'is-off' : ''}">
@@ -1530,52 +1533,58 @@ export class IFBWasherCard extends LitElement {
           </div>
         </div>
 
-        <!-- Action Row (Circular Buttons: Start, Pause, Cancel) -->
+        <!-- Action Row (M3 Circular Action Buttons with Clean Labels Below) -->
         <div class="gh-action-row">
-          <button
-            class="gh-circular-btn primary ${!isOnline || !isOn || isRunning ? 'disabled' : ''}"
-            title="${!isOnline
-              ? 'Device is offline'
-              : !isOn
-              ? 'Turn on the washer to start'
-              : isRunning
-              ? 'Cycle is already running'
-              : 'Start Cycle'}"
-            @click=${() => this._triggerButton(entities.start, isOnline, isOn)}
-          >
-            <ha-icon icon="mdi:play"></ha-icon>
-            <span class="gh-circular-label">${isPaused ? 'Resume' : 'Start'}</span>
-          </button>
+          <div class="gh-action-col">
+            <button
+              class="gh-action-circle primary ${!isOnline || !isOn || isRunning ? 'disabled' : ''}"
+              title="${!isOnline
+                ? 'Device is offline'
+                : !isOn
+                ? 'Turn on the washer to start'
+                : isRunning
+                ? 'Cycle is already running'
+                : 'Start Cycle'}"
+              @click=${() => this._triggerButton(entities.start, isOnline, isOn)}
+            >
+              <ha-icon icon="mdi:play"></ha-icon>
+            </button>
+            <span class="gh-action-label">${isPaused ? 'Resume' : 'Start'}</span>
+          </div>
 
-          <button
-            class="gh-circular-btn ${isPaused ? 'active' : ''} ${!isOnline || !isOn || !isRunning ? 'disabled' : ''}"
-            title="${!isOnline
-              ? 'Device is offline'
-              : !isOn
-              ? 'Turn on the washer'
-              : !isRunning
-              ? 'No cycle currently running'
-              : 'Pause Cycle'}"
-            @click=${() => this._triggerButton(entities.pause, isOnline, isOn)}
-          >
-            <ha-icon icon="mdi:pause"></ha-icon>
-            <span class="gh-circular-label">Pause</span>
-          </button>
+          <div class="gh-action-col">
+            <button
+              class="gh-action-circle ${isPaused ? 'active' : ''} ${!isOnline || !isOn || !isRunning ? 'disabled' : ''}"
+              title="${!isOnline
+                ? 'Device is offline'
+                : !isOn
+                ? 'Turn on the washer'
+                : !isRunning
+                ? 'No cycle currently running'
+                : 'Pause Cycle'}"
+              @click=${() => this._triggerButton(entities.pause, isOnline, isOn)}
+            >
+              <ha-icon icon="mdi:pause"></ha-icon>
+            </button>
+            <span class="gh-action-label">Pause</span>
+          </div>
 
-          <button
-            class="gh-circular-btn ${!isOnline || !isOn || (!isRunning && !isPaused) ? 'disabled' : ''}"
-            title="${!isOnline
-              ? 'Device is offline'
-              : !isOn
-              ? 'Turn on the washer'
-              : !isRunning && !isPaused
-              ? 'No active cycle to cancel'
-              : 'Cancel Cycle'}"
-            @click=${() => this._triggerButton(entities.cancel, isOnline, isOn)}
-          >
-            <ha-icon icon="mdi:stop"></ha-icon>
-            <span class="gh-circular-label">Cancel</span>
-          </button>
+          <div class="gh-action-col">
+            <button
+              class="gh-action-circle ${!isOnline || !isOn || (!isRunning && !isPaused) ? 'disabled' : ''}"
+              title="${!isOnline
+                ? 'Device is offline'
+                : !isOn
+                ? 'Turn on the washer'
+                : !isRunning && !isPaused
+                ? 'No active cycle to cancel'
+                : 'Cancel Cycle'}"
+              @click=${() => this._triggerButton(entities.cancel, isOnline, isOn)}
+            >
+              <ha-icon icon="mdi:stop"></ha-icon>
+            </button>
+            <span class="gh-action-label">Cancel</span>
+          </div>
         </div>
 
         <!-- Dropdowns for Program, Spin, Temp, Delay -->

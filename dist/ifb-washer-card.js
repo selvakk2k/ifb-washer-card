@@ -986,9 +986,9 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
   }
   /* ── M3 Open Circular Dial in Google Home View ── */
   .gh-full-card .drum-porthole {
-    background: transparent;
-    border: none;
-    box-shadow: none;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
   }
   .gh-full-card .ring-track {
     stroke: color-mix(in srgb, var(--appliance-text) 10%, transparent);
@@ -1044,18 +1044,70 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
   }
   .gh-action-row {
     display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 28px;
+    padding: 6px 0 20px 0;
+  }
+  .gh-action-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .gh-action-circle {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--appliance-text) 8%, transparent);
+    border: none;
+    color: var(--appliance-text);
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 18px;
-    padding: 6px 0 18px 0;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  .gh-action-circle:hover:not(.disabled) {
+    background: color-mix(in srgb, var(--appliance-text) 16%, transparent);
+    transform: translateY(-1px);
+  }
+  .gh-action-circle:active:not(.disabled) {
+    transform: scale(0.94);
+  }
+  .gh-action-circle.primary {
+    background: var(--appliance-accent);
+    color: var(--appliance-on-accent, #ffffff);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--appliance-accent) 40%, transparent);
+  }
+  .gh-action-circle.active {
+    background: var(--appliance-active-bg, color-mix(in srgb, var(--appliance-accent) 25%, transparent));
+    color: var(--appliance-accent);
+    border: 1.5px solid var(--appliance-accent);
+  }
+  .gh-action-circle.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .gh-action-circle ha-icon {
+    --mdc-icon-size: 24px;
+  }
+  .gh-action-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--appliance-text-2);
+    letter-spacing: 0.02em;
+    text-transform: capitalize;
   }
   .gh-circular-btn {
-    width: 60px;
-    height: 60px;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
-    background: rgba(128, 128, 128, 0.15);
+    background: color-mix(in srgb, var(--appliance-text) 8%, transparent);
     border: none;
-    color: var(--appliance-text-1);
+    color: var(--appliance-text);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1065,25 +1117,10 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
     outline: none;
     gap: 2px;
   }
-  .gh-circular-btn:hover:not(.disabled) {
-    background: rgba(128, 128, 128, 0.25);
-  }
-  .gh-circular-btn:active:not(.disabled) {
-    transform: scale(0.95);
-  }
   .gh-circular-btn.primary {
     background: var(--appliance-accent);
     color: var(--appliance-on-accent, #ffffff);
     box-shadow: 0 4px 14px color-mix(in srgb, var(--appliance-accent) 40%, transparent);
-  }
-  .gh-circular-btn.active {
-    background: var(--appliance-active-bg, rgba(38, 166, 154, 0.25));
-    color: var(--appliance-accent);
-    border: 1px solid var(--appliance-accent);
-  }
-  .gh-circular-btn.disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
   }
   .gh-circular-btn ha-icon {
     --mdc-icon-size: 24px;
@@ -1337,7 +1374,7 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
               </div>
             `:F}
       </div>
-    `}_renderGoogleHomeFull(e,t,i,o,s,a,n,r,l,c,p,d,h,u,m,g,f,v,b,_,y,w,x,$,k,P,D,C,S,T){const M=s?this._formatRemaining(l):i?n?"Done":"Standby":"Off",R=2*Math.PI*70,A=R-c/100*R,E=b>400,H=e.program?this.hass.states[e.program]:void 0,N=H?.attributes?.program_duration||me[p]||0;let z="--";s?z=l>0?`${l} min`:"Running":N>0&&(z=`${N} min`);const L=i?f?"Fault":s?r:n?"Done":p||"Standby":"";return B`
+    `}_renderGoogleHomeFull(e,t,i,o,s,a,n,r,l,c,p,d,h,u,m,g,f,v,b,_,y,w,x,$,k,P,D,C,S,T){const M=e.program?this.hass.states[e.program]:void 0,R=M?.attributes?.program_duration||me[p]||0;let A="--";s?A=l>0?`${l} min`:"Running":R>0&&(A=`${R} min`);const E=s?this._formatRemaining(l):i?n?"Done":R>0?`${R} min`:"Standby":"Off",H=2*Math.PI*70,N=H-c/100*H,z=b>400,L=i?f?"Fault":s?r:n?"Done":p||"":"";return B`
       <ha-card class="gh-full-card ${i?"":"is-off"}">
         <!-- Header -->
         <div class="gh-header">
@@ -1393,15 +1430,15 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
                       cx="82"
                       cy="82"
                       r="${70}"
-                      style="stroke-dasharray: ${R}; stroke-dashoffset: ${A};"
+                      style="stroke-dasharray: ${H}; stroke-dashoffset: ${N};"
                     />
                   `:F}
             </svg>
             <div class="drum-porthole">
-              ${s?B`<div class="drum-baffles ${E?"fast-spin":"spinning"}"></div>`:F}
+              ${s?B`<div class="drum-baffles ${z?"fast-spin":"spinning"}"></div>`:F}
               <div class="porthole-content">
                 <div class="porthole-hero-time">
-                  ${M}
+                  ${E}
                 </div>
                 ${i&&L?B`<div class="porthole-phase">${L}</div>`:F}
                 ${i&&(b>0||v>0)?B`
@@ -1418,44 +1455,50 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
           <!-- Right Flank: Run Time -->
           <div
             class="dial-flank runtime-flank"
-            title="Program run time: ${z}"
+            title="Program run time: ${A}"
           >
             <div class="dial-flank-icon-btn static">
               <ha-icon icon="mdi:clock-outline"></ha-icon>
             </div>
             <span class="dial-flank-label">Run Time</span>
-            <span class="dial-flank-status">${z}</span>
+            <span class="dial-flank-status">${A}</span>
           </div>
         </div>
 
-        <!-- Action Row (Circular Buttons: Start, Pause, Cancel) -->
+        <!-- Action Row (M3 Circular Action Buttons with Clean Labels Below) -->
         <div class="gh-action-row">
-          <button
-            class="gh-circular-btn primary ${o&&i&&!s?"":"disabled"}"
-            title="${o?i?s?"Cycle is already running":"Start Cycle":"Turn on the washer to start":"Device is offline"}"
-            @click=${()=>this._triggerButton(e.start,o,i)}
-          >
-            <ha-icon icon="mdi:play"></ha-icon>
-            <span class="gh-circular-label">${a?"Resume":"Start"}</span>
-          </button>
+          <div class="gh-action-col">
+            <button
+              class="gh-action-circle primary ${o&&i&&!s?"":"disabled"}"
+              title="${o?i?s?"Cycle is already running":"Start Cycle":"Turn on the washer to start":"Device is offline"}"
+              @click=${()=>this._triggerButton(e.start,o,i)}
+            >
+              <ha-icon icon="mdi:play"></ha-icon>
+            </button>
+            <span class="gh-action-label">${a?"Resume":"Start"}</span>
+          </div>
 
-          <button
-            class="gh-circular-btn ${a?"active":""} ${o&&i&&s?"":"disabled"}"
-            title="${o?i?s?"Pause Cycle":"No cycle currently running":"Turn on the washer":"Device is offline"}"
-            @click=${()=>this._triggerButton(e.pause,o,i)}
-          >
-            <ha-icon icon="mdi:pause"></ha-icon>
-            <span class="gh-circular-label">Pause</span>
-          </button>
+          <div class="gh-action-col">
+            <button
+              class="gh-action-circle ${a?"active":""} ${o&&i&&s?"":"disabled"}"
+              title="${o?i?s?"Pause Cycle":"No cycle currently running":"Turn on the washer":"Device is offline"}"
+              @click=${()=>this._triggerButton(e.pause,o,i)}
+            >
+              <ha-icon icon="mdi:pause"></ha-icon>
+            </button>
+            <span class="gh-action-label">Pause</span>
+          </div>
 
-          <button
-            class="gh-circular-btn ${o&&i&&(s||a)?"":"disabled"}"
-            title="${o?i?s||a?"Cancel Cycle":"No active cycle to cancel":"Turn on the washer":"Device is offline"}"
-            @click=${()=>this._triggerButton(e.cancel,o,i)}
-          >
-            <ha-icon icon="mdi:stop"></ha-icon>
-            <span class="gh-circular-label">Cancel</span>
-          </button>
+          <div class="gh-action-col">
+            <button
+              class="gh-action-circle ${o&&i&&(s||a)?"":"disabled"}"
+              title="${o?i?s||a?"Cancel Cycle":"No active cycle to cancel":"Turn on the washer":"Device is offline"}"
+              @click=${()=>this._triggerButton(e.cancel,o,i)}
+            >
+              <ha-icon icon="mdi:stop"></ha-icon>
+            </button>
+            <span class="gh-action-label">Cancel</span>
+          </div>
         </div>
 
         <!-- Dropdowns for Program, Spin, Temp, Delay -->
