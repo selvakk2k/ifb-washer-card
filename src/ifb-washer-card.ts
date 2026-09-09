@@ -1387,6 +1387,22 @@ export class IFBWasherCard extends LitElement {
       ? 'Done'
       : 'Standby';
 
+    const radius = 70;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (progressPct / 100) * circumference;
+    const isSpinningFast = motorRpm > 400;
+    const programObj = entities.program ? this.hass.states[entities.program] : undefined;
+    const nominalDuration =
+      (programObj?.attributes?.program_duration as number) ||
+      PROGRAM_DURATIONS[currentProgram] ||
+      0;
+    let runTimeDisplay = '--';
+    if (isRunning) {
+      runTimeDisplay = remMinutes > 0 ? `${remMinutes} min` : 'Running';
+    } else if (nominalDuration > 0) {
+      runTimeDisplay = `${nominalDuration} min`;
+    }
+
     return html`
       <ha-card class="gh-full-card">
         <!-- Header -->
@@ -1421,26 +1437,86 @@ export class IFBWasherCard extends LitElement {
           </div>
         </div>
 
-        <!-- Center Hero Display -->
-        <div class="gh-center">
-          <div class="gh-value-large">${displayValue}</div>
-          <div class="gh-subtitle-large">
-            <div>
-              ${isRunning
-                ? `${machineState}${tubTemp > 0 ? ` • ${tubTemp}°C` : ''}${motorRpm > 0 ? ` • ${motorRpm} RPM` : ''}`
-                : isOn
-                ? `${currentProgram || 'Select Program'}${currentTemp && currentTemp !== 'None' ? ` • ${currentTemp}` : ''}${currentSpin && currentSpin !== 'None' ? ` • ${currentSpin}` : ''}`
-                : 'Washer is turned off'}
+        <!-- M3 Porthole & Radial Progress Dial with Flanks -->
+        <div class="porthole-container">
+          <!-- Left Flank: Child Lock -->
+          <div
+            class="dial-flank child-lock-flank ${isChildLockActive ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
+            title="${!isOnline
+              ? 'Device is offline'
+              : !isOn
+              ? 'Turn on the washer to toggle child lock'
+              : (HELP_DESCRIPTIONS['Child Lock'] || 'Toggle Child Lock')}"
+            @touchstart=${() => this._handleTouchStart(HELP_DESCRIPTIONS['Child Lock'] || 'Locks machine control panel')}
+            @touchend=${() => this._handleTouchEnd()}
+            @touchcancel=${() => this._handleTouchEnd()}
+            @click=${(e: Event) => {
+              if (this._isLongPress) {
+                this._isLongPress = false;
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+              }
+              this._toggleChildLock(entities.childLock, isOnline, isOn);
+            }}
+          >
+            <div class="dial-flank-icon-btn ${isChildLockActive ? 'active' : ''}">
+              <ha-icon icon="${isChildLockActive ? 'mdi:lock' : 'mdi:lock-open-variant-outline'}"></ha-icon>
             </div>
-            ${isOn
-              ? html`
-                  <div class="gh-mode-pill">
-                    ${isRunning
-                      ? (currentProgram || machineState)
-                      : (PROGRAM_DURATIONS[currentProgram] ? `${PROGRAM_DURATIONS[currentProgram]} min` : currentProgram || 'Standby')}
-                  </div>
-                `
-              : nothing}
+            <span class="dial-flank-label">Child Lock</span>
+            <span class="dial-flank-status">${isChildLockActive ? 'Locked' : 'Unlocked'}</span>
+          </div>
+
+          <!-- Center: Porthole Ring Wrapper -->
+          <div class="porthole-ring-wrapper">
+            <svg class="porthole-svg" viewBox="0 0 164 164">
+              <circle class="ring-track" cx="82" cy="82" r="${radius}" />
+              ${isRunning || isComplete
+                ? html`
+                    <circle
+                      class="ring-progress"
+                      cx="82"
+                      cy="82"
+                      r="${radius}"
+                      style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${strokeDashoffset};"
+                    />
+                  `
+                : nothing}
+            </svg>
+            <div class="drum-porthole">
+              ${isRunning
+                ? html`<div class="drum-baffles ${isSpinningFast ? 'fast-spin' : 'spinning'}"></div>`
+                : nothing}
+              <div class="porthole-content">
+                <div class="porthole-hero-time">
+                  ${displayValue}
+                </div>
+                <div class="porthole-phase">
+                  ${!isOn ? 'Standby' : hasProblem ? 'Fault' : isRunning ? machineState : currentProgram || machineState}
+                </div>
+                ${motorRpm > 0 || tubTemp > 0
+                  ? html`
+                      <div class="porthole-submetrics">
+                        ${motorRpm > 0 ? `${motorRpm} RPM` : ''}
+                        ${motorRpm > 0 && tubTemp > 0 ? ' • ' : ''}
+                        ${tubTemp > 0 ? `${tubTemp}°C` : ''}
+                      </div>
+                    `
+                  : nothing}
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Flank: Run Time -->
+          <div
+            class="dial-flank runtime-flank"
+            title="Program run time: ${runTimeDisplay}"
+          >
+            <div class="dial-flank-icon-btn static">
+              <ha-icon icon="mdi:clock-outline"></ha-icon>
+            </div>
+            <span class="dial-flank-label">Run Time</span>
+            <span class="dial-flank-status">${runTimeDisplay}</span>
           </div>
         </div>
 

@@ -993,12 +993,12 @@ export const styles = css`
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    padding: 16px 0 24px 0;
+    gap: 18px;
+    padding: 6px 0 18px 0;
   }
   .gh-circular-btn {
-    width: 64px;
-    height: 64px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     background: rgba(128, 128, 128, 0.15);
     border: none;
@@ -1008,16 +1008,20 @@ export const styles = css`
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: 0.2s;
+    transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     outline: none;
     gap: 2px;
   }
   .gh-circular-btn:hover:not(.disabled) {
     background: rgba(128, 128, 128, 0.25);
   }
+  .gh-circular-btn:active:not(.disabled) {
+    transform: scale(0.95);
+  }
   .gh-circular-btn.primary {
     background: var(--appliance-accent);
     color: var(--appliance-on-accent, #ffffff);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--appliance-accent) 40%, transparent);
   }
   .gh-circular-btn.active {
     background: var(--appliance-active-bg, rgba(38, 166, 154, 0.25));
@@ -1029,7 +1033,7 @@ export const styles = css`
     cursor: not-allowed;
   }
   .gh-circular-btn ha-icon {
-    --mdc-icon-size: 26px;
+    --mdc-icon-size: 24px;
   }
   .gh-circular-label {
     font-size: 0.68rem;
