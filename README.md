@@ -22,8 +22,18 @@ Adheres directly to the Smart Appliance Lovelace Design System, matching the sty
 * **Cycle Modifiers**: Interactive toggle chips for Pre-wash, Soak, Extra Rinse (+1/+2/+3), Steam, Aroma, and Anti-Crease.
 * **Auxiliary Status Chips**: Dedicated chips for Child Lock and Door Lock indicators.
 * **Theme Support & Material You**: Seamless compatibility with default Home Assistant themes, custom color overrides, and dedicated Material You mode (optimized for the [Material 3 Theme by Merwyn](https://github.com/marcomow/ha-material-3-theme)).
+* **Multiple Visual Layouts**: Seamless borderless Google Home layout and structured Classic card views with subtle ambient active glow indicators.
 * **Symmetrical Header Controls**: Standardized 40px circular collapse chevron and power switch button with dual-layer ambient glow.
 * **Guarded Interactions & Haptics**: Unavailable options are greyed out with sentence-case toast notifications and tactile haptics.
+
+---
+
+## Screenshots
+
+| Google Home Style | Classic Card Style |
+| :--- | :--- |
+| **Full View**<br>*(Screenshot: Google Home Full View)* | **Full View**<br>*(Screenshot: Classic Full View)* |
+| **Compact View**<br>*(Screenshot: Google Home Compact View)* | **Compact View**<br>*(Screenshot: Classic Compact View)* |
 
 ---
 
