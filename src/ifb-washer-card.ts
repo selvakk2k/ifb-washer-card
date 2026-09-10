@@ -942,11 +942,6 @@ export class IFBWasherCard extends LitElement {
     const supportsAroma: boolean = progCaps.supports_aroma ?? staticCaps.supportsAroma ?? true;
     const supportsAntiCrease: boolean = progCaps.supports_anti_crease ?? staticCaps.supportsAntiCrease ?? true;
 
-    // Gated dry mode options
-    const effectiveDryModeOptions: string[] = (allowedDryModes && allowedDryModes.length > 0)
-      ? allowedDryModes
-      : (dryModeOptions.length > 0 ? dryModeOptions : ['No Dry']);
-
     // Modifiers list
     const modifiers = [
       { key: 'prewash', label: 'Pre-wash', icon: 'mdi:water-plus', entityId: entities.prewash, supported: supportsPrewash },
@@ -996,9 +991,16 @@ export class IFBWasherCard extends LitElement {
           allowedSpins.some((as) => s.toLowerCase().replace(/[^a-z0-9]/g, '') === as.toLowerCase().replace(/[^a-z0-9]/g, ''))
         )
       : spinOptions;
+    const filteredDryModeOptions = allowedDryModes && allowedDryModes.length > 0 && dryModeOptions.length > 0
+      ? dryModeOptions.filter((d) =>
+          allowedDryModes.some((ad) => d.toLowerCase().replace(/[^a-z0-9]/g, '') === ad.toLowerCase().replace(/[^a-z0-9]/g, ''))
+        )
+      : (allowedDryModes && allowedDryModes.length > 0 ? allowedDryModes : dryModeOptions);
 
     const effectiveTempOptions = (filteredTempOptions.length > 0 ? filteredTempOptions : allowedTemps) || tempOptions;
     const effectiveSpinOptions = (filteredSpinOptions.length > 0 ? filteredSpinOptions : allowedSpins) || spinOptions;
+    const effectiveDryModeOptions: string[] = (filteredDryModeOptions.length > 0 ? filteredDryModeOptions : allowedDryModes) || (dryModeOptions.length > 0 ? dryModeOptions : ['No Dry']);
+
 
     if (this._config.full_layout === 'google_home') {
       return this._renderGoogleHomeFull(
