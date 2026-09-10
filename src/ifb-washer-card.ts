@@ -427,6 +427,16 @@ export class IFBWasherCard extends LitElement {
         {
           name: '',
           type: 'expandable',
+          title: 'Theming & Colors',
+          icon: 'mdi:palette',
+          schema: [
+            { name: 'accent_color', label: 'Accent Color Override', selector: { ui_color: {} } },
+            { name: 'main_color', label: 'Background Color Override', selector: { ui_color: {} } },
+          ],
+        },
+        {
+          name: '',
+          type: 'expandable',
           title: 'Display Sensors (Auto-Discovered if blank)',
           icon: 'mdi:thermometer',
           schema: [
@@ -450,29 +460,32 @@ export class IFBWasherCard extends LitElement {
             { name: 'spin_select', label: 'Spin Speed Select', selector: { entity: { domain: 'select' } } },
             { name: 'temperature_select', label: 'Temperature Select', selector: { entity: { domain: 'select' } } },
             { name: 'delay_select', label: 'Delay Start Select', selector: { entity: { domain: 'select' } } },
+            { name: 'extra_rinse_select', label: 'Extra Rinse Select', selector: { entity: { domain: 'select' } } },
+            { name: 'dry_mode_select', label: 'Dry Mode Select', selector: { entity: { domain: 'select' } } },
             { name: 'start_button', label: 'Start Button', selector: { entity: { domain: 'button' } } },
             { name: 'pause_button', label: 'Pause Button', selector: { entity: { domain: 'button' } } },
             { name: 'cancel_button', label: 'Cancel Button', selector: { entity: { domain: 'button' } } },
             { name: 'child_lock_switch', label: 'Child Lock Switch', selector: { entity: { domain: 'switch' } } },
           ],
         },
-        {
-          name: '',
-          type: 'expandable',
-          title: 'Theming & Colors',
-          icon: 'mdi:palette',
-          schema: [
-            { name: 'accent_color', label: 'Accent Color Override', selector: { ui_color: {} } },
-            { name: 'main_color', label: 'Background Color Override', selector: { ui_color: {} } },
-          ],
-        },
       ],
     };
   }
 
-  public static getStubConfig(hass?: HomeAssistant) {
+  public static getStubConfig(hass?: HomeAssistant, entities?: string[], entitiesFallback?: string[]) {
+    let entity = '';
+    if (entities && entities.length) {
+      entity = entities.find((e) => e.includes('machine_state') || e.includes('washer')) || entities[0] || '';
+    }
+    if (!entity && entitiesFallback && entitiesFallback.length) {
+      entity = entitiesFallback.find((e) => e.includes('machine_state') || e.includes('washer')) || entitiesFallback[0] || '';
+    }
+    if (!entity && hass && hass.states) {
+      entity = Object.keys(hass.states).find((e) => e.startsWith('sensor.') && e.endsWith('_machine_state')) || '';
+    }
     return {
       type: 'custom:ifb-washer-card',
+      entity: entity || undefined,
     };
   }
 
