@@ -39,12 +39,13 @@ Adheres directly to the Smart Appliance Lovelace Design System, matching the sty
 
 ## Installation
 
-### Option 1: HACS Custom Repository (Recommended)
+### Option 1: Via HACS (Recommended)
 
-1. Open **HACS** in your Home Assistant dashboard.
-2. Navigate to **Frontend** > Top-right 3 dots > **Custom repositories**.
-3. Add `https://github.com/selvakk2k/ifb-washer-card` with category **Lovelace**.
-4. Click **Download**, then reload your browser resources.
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=selvakk2k&repository=ifb-washer-card&category=plugin)
+
+1. Click the **Open repository in HACS** button above, or open **HACS** from your Home Assistant sidebar.
+2. If installing as a custom repository: click the top-right menu (⋮) → **Custom repositories** → Add `https://github.com/selvakk2k/ifb-washer-card` (Category: *Dashboard*).
+3. Search for **IFB Washer Card**, click **Download**, and reload your dashboard.
 
 ### Option 2: Manual Installation
 
