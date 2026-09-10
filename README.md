@@ -1,7 +1,8 @@
 # IFB Washer Custom Lovelace Card (`ifb-washer-card`)
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=flat-square)](https://github.com/hacs/integration)
-[![Version](https://img.shields.io/github/v/release/selvakk2k/ifb-washer-card?style=flat-square)](https://github.com/selvakk2k/ifb-washer-card/releases)
+[![Stable](https://img.shields.io/github/v/release/selvakk2k/ifb-washer-card?label=Stable&style=flat-square)](https://github.com/selvakk2k/ifb-washer-card/releases/latest)
+[![Beta](https://img.shields.io/github/v/release/selvakk2k/ifb-washer-card?include_prereleases&label=Beta&color=orange&style=flat-square)](https://github.com/selvakk2k/ifb-washer-card/releases)
 [![AI-Assisted](https://img.shields.io/badge/AI%20Assisted-Antigravity%20%7C%20Claude-blueviolet?style=flat-square&logo=google)](https://github.com/selvakk2k)
 [![AI Attribution](https://img.shields.io/badge/AI%20Attribution-AIA%20PAI%20Nc%20Hin-orange?style=flat-square)](https://aiattribution.github.io/interpret-attribution)
 
@@ -16,7 +17,9 @@ Adheres directly to the Smart Appliance Lovelace Design System, matching the sty
 * **Animated Drum Visual**: Radial porthole progress ring with dynamic spinning drum rotation during active wash and high-speed spin cycles.
 * **Hero Telemetry Display**: Displays remaining cycle time, active cycle phase (Main Wash, Rinse, Spin, etc.), live motor speed (RPM), and tub water temperature.
 * **Full Remote Actions**: One-touch Start, Pause, and Cancel controls with guarded state protection.
-* **Segmented Controls**: Instant selection bars for wash programs, spin speed options, temperature settings, and delay start.
+* **Segmented Controls**: Instant selection bars and custom dropdowns for wash programs, spin speed options, temperature settings, and delay start.
+* **Washer-Dryer Controls**: Dedicated dry mode selectors (Cupboard Dry, Iron Dry, Eco Dry, Gentle Dry, Timed Dry) for combo models.
+* **Cycle Modifiers**: Interactive toggle chips for Pre-wash, Soak, Extra Rinse (+1/+2/+3), Steam, Aroma, and Anti-Crease.
 * **Auxiliary Status Chips**: Dedicated chips for Child Lock and Door Lock indicators.
 * **Theme Support**: Seamless compatibility with default Home Assistant themes, Material You styling, and custom color overrides.
 * **Symmetrical Header Controls**: Standardized 40px circular collapse chevron and power switch button with dual-layer ambient glow.
