@@ -57,9 +57,9 @@ Adheres directly to the Smart Appliance Lovelace Design System, matching the sty
 
 ---
 
-## Configuration
+## Usage & Configuration
 
-Add the card via the visual dashboard card picker by searching for **IFB Washer Card**, or use YAML:
+Add via the card picker (search for **IFB Washer Card**) or paste manually into YAML:
 
 ```yaml
 type: custom:ifb-washer-card
