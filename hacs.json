@@ -1,5 +1,9 @@
 {
   "name": "IFB Washer Card",
   "render_readme": true,
-  "filename": "ifb-washer-card.js"
+  "filename": "ifb-washer-card.js",
+  "content_in_root": false,
+  "country": [
+    "IN"
+  ]
 }
