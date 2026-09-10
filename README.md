@@ -1,4 +1,4 @@
-# IFB Washer Custom Lovelace Card (`ifb-washer-card`)
+# IFB Washer Card (`ifb-washer-card`)
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=flat-square)](https://github.com/hacs/integration)
 [![Stable](https://img.shields.io/github/v/release/selvakk2k/ifb-washer-card?label=Stable&style=flat-square)](https://github.com/selvakk2k/ifb-washer-card/releases/latest)
@@ -39,7 +39,7 @@ Adheres directly to the Smart Appliance Lovelace Design System, matching the sty
 
 ## Installation
 
-### Option 1: Via HACS (Recommended)
+### Method 1: Via HACS (Recommended)
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=selvakk2k&repository=ifb-washer-card&category=plugin)
 
@@ -47,7 +47,7 @@ Adheres directly to the Smart Appliance Lovelace Design System, matching the sty
 2. Click the top-right menu (⋮) → **Custom repositories** → Add `https://github.com/selvakk2k/ifb-washer-card` with category **Dashboard**.
 3. Search for **IFB Washer Card**, click **Download**, and reload your dashboard.
 
-### Option 2: Manual Installation
+### Method 2: Manual Installation
 
 1. Download `ifb-washer-card.js` from the latest release.
 2. Place the file in your Home Assistant configuration directory under `www/ifb-washer-card.js`.
@@ -67,6 +67,7 @@ entity: switch.kitchen_ifb_washer_dryer_wd_executive_zxs_series_192_168_0_100_po
 name: Kitchen Washer Dryer
 theme: default
 layout: default
+full_layout: google_home
 ```
 
 ### Configuration Options
@@ -75,8 +76,9 @@ layout: default
 | :--- | :--- | :--- | :--- |
 | `entity` | `string` | **Required** | Primary washer entity (`switch.<device>_power` or any device entity). |
 | `name` | `string` | Optional | Custom friendly title for the card header. |
-| `theme` | `string` | `default` | `default` (Standard HA Theme) or `material_you` (Material You). |
-| `layout` | `string` | `default` | `default` (Full Dashboard) or `compact` (Expandable single-row). |
+| `theme` | `string` | `default` | Visual theme: `default` (Standard HA Theme) or `material_you` (Material You). |
+| `layout` | `string` | `default` | Card geometry: `default` (Full View) or `compact` (Expandable compact row). |
+| `full_layout` | `string` | `default` | Full view layout style: `default` (Classic) or `google_home` (Google Home). |
 | `accent_color` | `string` | Optional | Custom accent color override (e.g. `#00b4d8`). |
 | `main_color` | `string` | Optional | Custom background surface color override. |
 
