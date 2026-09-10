@@ -2560,10 +2560,21 @@ export class IFBWasherCard extends LitElement {
 
 customElements.define('ifb-washer-card', IFBWasherCard);
 
-(window as any).customCards = (window as any).customCards || [];
-(window as any).customCards.push({
+const customCardEntry = {
   type: 'ifb-washer-card',
   name: 'IFB Washer Card',
   description: 'A custom Lovelace card for IFB washing machines and washer dryers.',
   preview: true,
-});
+  domain: 'sensor',
+  domains: ['sensor', 'switch', 'select'],
+  documentationURL: 'https://github.com/selvakk2k/ifb-washer-card',
+};
+(window as any).customCards = (window as any).customCards || [];
+const existingCardIdx = (window as any).customCards.findIndex(
+  (c: any) => c.type === 'ifb-washer-card' || c.type === 'custom:ifb-washer-card'
+);
+if (existingCardIdx >= 0) {
+  (window as any).customCards[existingCardIdx] = customCardEntry;
+} else {
+  (window as any).customCards.push(customCardEntry);
+}
