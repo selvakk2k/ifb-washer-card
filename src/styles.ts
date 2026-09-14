@@ -180,7 +180,8 @@ export const styles = css`
     user-select: none;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .dial-flank.runtime-flank {
+  .dial-flank.runtime-flank,
+  .dial-flank.phase-flank {
     cursor: default;
   }
   .dial-flank.disabled {
@@ -203,11 +204,11 @@ export const styles = css`
   .dial-flank-icon-btn ha-icon {
     --mdc-icon-size: 20px;
   }
-  .dial-flank:hover:not(.disabled):not(.runtime-flank) .dial-flank-icon-btn {
+  .dial-flank:hover:not(.disabled):not(.runtime-flank):not(.phase-flank) .dial-flank-icon-btn {
     background: var(--appliance-surface-hover);
     color: var(--appliance-text);
   }
-  .dial-flank:active:not(.disabled):not(.runtime-flank) .dial-flank-icon-btn {
+  .dial-flank:active:not(.disabled):not(.runtime-flank):not(.phase-flank) .dial-flank-icon-btn {
     transform: scale(0.94);
   }
   .dial-flank-icon-btn.active {
@@ -974,7 +975,7 @@ export const styles = css`
     color: var(--appliance-text-2);
     box-shadow: none;
   }
-  .gh-full-card .dial-flank:hover:not(.disabled):not(.runtime-flank) .dial-flank-icon-btn {
+  .gh-full-card .dial-flank:hover:not(.disabled):not(.runtime-flank):not(.phase-flank) .dial-flank-icon-btn {
     background: color-mix(in srgb, var(--appliance-text) 16%, transparent);
     color: var(--appliance-text);
   }

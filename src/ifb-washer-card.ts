@@ -1443,12 +1443,36 @@ export class IFBWasherCard extends LitElement {
       (programObj?.attributes?.program_duration as number) ||
       PROGRAM_DURATIONS[currentProgram] ||
       0;
-    let runTimeDisplay = '--';
-    if (isRunning) {
-      runTimeDisplay = remMinutes > 0 ? `${remMinutes} min` : 'Running';
-    } else if (nominalDuration > 0) {
-      runTimeDisplay = `${nominalDuration} min`;
-    }
+    const flankLabel = isRunning ? 'Phase' : 'Status';
+    const flankStatus = !isOn
+      ? 'Off'
+      : hasProblem
+      ? 'Fault'
+      : isPaused
+      ? 'Paused'
+      : isRunning
+      ? machineState
+      : isComplete
+      ? 'Done'
+      : 'Ready';
+
+    const phaseIcon = !isOn
+      ? 'mdi:power-off'
+      : hasProblem
+      ? 'mdi:alert-circle-outline'
+      : isComplete
+      ? 'mdi:check-circle-outline'
+      : isPaused
+      ? 'mdi:pause-circle-outline'
+      : isRunning
+      ? (machineState.toLowerCase().includes('spin')
+          ? 'mdi:sync'
+          : machineState.toLowerCase().includes('rinse')
+          ? 'mdi:water-sync'
+          : machineState.toLowerCase().includes('dry')
+          ? 'mdi:heat-wave'
+          : 'mdi:washing-machine')
+      : 'mdi:progress-clock';
 
     const displayValue = isRunning
       ? this._formatRemaining(remMinutes)
@@ -1465,15 +1489,9 @@ export class IFBWasherCard extends LitElement {
     const strokeDashoffset = circumference - (progressPct / 100) * circumference;
     const isSpinningFast = motorRpm > 400;
 
-    const phaseDisplay = !isOn
+    const programBadge = !isOn
       ? ''
-      : hasProblem
-      ? 'Fault'
-      : isRunning
-      ? machineState
-      : isComplete
-      ? 'Done'
-      : (currentProgram || '');
+      : (currentProgram || (isOn ? 'Select Program' : ''));
 
     const submetricsDisplay = (() => {
       if (!isOn) return null;
@@ -1577,8 +1595,8 @@ export class IFBWasherCard extends LitElement {
                 <div class="porthole-hero-time">
                   ${displayValue}
                 </div>
-                ${isOn && phaseDisplay
-                  ? html`<div class="porthole-phase">${phaseDisplay}</div>`
+                ${isOn && programBadge
+                  ? html`<div class="porthole-phase">${programBadge}</div>`
                   : nothing}
                 ${submetricsDisplay
                   ? html`
@@ -1591,16 +1609,16 @@ export class IFBWasherCard extends LitElement {
             </div>
           </div>
 
-          <!-- Right Flank: Run Time -->
+          <!-- Right Flank: Cycle Phase / Status -->
           <div
-            class="dial-flank runtime-flank"
-            title="Program run time: ${runTimeDisplay}"
+            class="dial-flank phase-flank ${isRunning ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
+            title="Cycle status: ${flankStatus}"
           >
-            <div class="dial-flank-icon-btn static">
-              <ha-icon icon="mdi:clock-outline"></ha-icon>
+            <div class="dial-flank-icon-btn static ${isRunning ? 'active' : ''}">
+              <ha-icon icon="${phaseIcon}"></ha-icon>
             </div>
-            <span class="dial-flank-label">Run Time</span>
-            <span class="dial-flank-status">${runTimeDisplay}</span>
+            <span class="dial-flank-label">${flankLabel}</span>
+            <span class="dial-flank-status">${flankStatus}</span>
           </div>
         </div>
 
@@ -2012,12 +2030,36 @@ export class IFBWasherCard extends LitElement {
       (programObj?.attributes?.program_duration as number) ||
       PROGRAM_DURATIONS[currentProgram] ||
       0;
-    let runTimeDisplay = '--';
-    if (isRunning) {
-      runTimeDisplay = remMinutes > 0 ? `${remMinutes} min` : 'Running';
-    } else if (nominalDuration > 0) {
-      runTimeDisplay = `${nominalDuration} min`;
-    }
+    const flankLabel = isRunning ? 'Phase' : 'Status';
+    const flankStatus = !isOn
+      ? 'Off'
+      : hasProblem
+      ? 'Fault'
+      : isPaused
+      ? 'Paused'
+      : isRunning
+      ? machineState
+      : isComplete
+      ? 'Done'
+      : 'Ready';
+
+    const phaseIcon = !isOn
+      ? 'mdi:power-off'
+      : hasProblem
+      ? 'mdi:alert-circle-outline'
+      : isComplete
+      ? 'mdi:check-circle-outline'
+      : isPaused
+      ? 'mdi:pause-circle-outline'
+      : isRunning
+      ? (machineState.toLowerCase().includes('spin')
+          ? 'mdi:sync'
+          : machineState.toLowerCase().includes('rinse')
+          ? 'mdi:water-sync'
+          : machineState.toLowerCase().includes('dry')
+          ? 'mdi:heat-wave'
+          : 'mdi:washing-machine')
+      : 'mdi:progress-clock';
 
     const displayValue = isRunning
       ? this._formatRemaining(remMinutes)
@@ -2029,15 +2071,9 @@ export class IFBWasherCard extends LitElement {
       ? `${nominalDuration} min`
       : 'Standby';
 
-    const phaseDisplay = !isOn
+    const programBadge = !isOn
       ? ''
-      : hasProblem
-      ? 'Fault'
-      : isRunning
-      ? machineState
-      : isComplete
-      ? 'Done'
-      : (currentProgram || 'Standby');
+      : (currentProgram || (isOn ? 'Select Program' : ''));
 
     const submetricsDisplay = (() => {
       if (!isOn) return null;
@@ -2108,8 +2144,8 @@ export class IFBWasherCard extends LitElement {
               <div class="porthole-hero-time">
                 ${displayValue}
               </div>
-              ${isOn && phaseDisplay
-                ? html`<div class="porthole-phase">${phaseDisplay}</div>`
+              ${isOn && programBadge
+                ? html`<div class="porthole-phase">${programBadge}</div>`
                 : nothing}
               ${submetricsDisplay
                 ? html`
@@ -2122,16 +2158,16 @@ export class IFBWasherCard extends LitElement {
           </div>
         </div>
 
-        <!-- Right Flank: Run Time -->
+        <!-- Right Flank: Cycle Phase / Status -->
         <div
-          class="dial-flank runtime-flank"
-          title="Program run time: ${runTimeDisplay}"
+          class="dial-flank phase-flank ${isRunning ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
+          title="Cycle status: ${flankStatus}"
         >
-          <div class="dial-flank-icon-btn static">
-            <ha-icon icon="mdi:clock-outline"></ha-icon>
+          <div class="dial-flank-icon-btn static ${isRunning ? 'active' : ''}">
+            <ha-icon icon="${phaseIcon}"></ha-icon>
           </div>
-          <span class="dial-flank-label">Run Time</span>
-          <span class="dial-flank-status">${runTimeDisplay}</span>
+          <span class="dial-flank-label">${flankLabel}</span>
+          <span class="dial-flank-status">${flankStatus}</span>
         </div>
       </div>
 

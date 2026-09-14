@@ -184,9 +184,20 @@ check(
   cardFile.includes('supportsDry')
 );
 
+// 18. Cycle Phase Flank & Porthole Program Retention
+check(
+  'Right flank displays cycle phase/status and dial badge retains program name',
+  cardFile.includes('phase-flank') &&
+  cardFile.includes('flankLabel') &&
+  cardFile.includes('flankStatus') &&
+  cardFile.includes('programBadge') &&
+  stylesFile.includes('.dial-flank.phase-flank')
+);
+
 if (errors > 0) {
   console.error(`\nAudit completed with ${errors} error(s).`);
   process.exit(1);
 } else {
   console.log('\nAll Design System Compliance Checks Passed Cleanly!\n');
 }
+
