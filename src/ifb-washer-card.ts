@@ -1647,15 +1647,6 @@ export class IFBWasherCard extends LitElement {
                 : nothing}
             </svg>
             <div class="drum-porthole">
-              ${isRunning
-                ? html`
-                    <div class="drum-rotor ${rotorClass}">
-                      <div class="drum-baffle baffle-1"></div>
-                      <div class="drum-baffle baffle-2"></div>
-                      <div class="drum-baffle baffle-3"></div>
-                    </div>
-                  `
-                : nothing}
               ${isDrying ? html`<div class="drum-drying-heat"></div>` : nothing}
               <div class="drum-water ${waterLevelClass}"></div>
               <div class="porthole-content">
@@ -2262,15 +2253,6 @@ export class IFBWasherCard extends LitElement {
               : nothing}
           </svg>
           <div class="drum-porthole">
-            ${isRunning
-              ? html`
-                  <div class="drum-rotor ${rotorClassClassic}">
-                    <div class="drum-baffle baffle-1"></div>
-                    <div class="drum-baffle baffle-2"></div>
-                    <div class="drum-baffle baffle-3"></div>
-                  </div>
-                `
-              : nothing}
             ${isDryingClassic
               ? html`<div class="drum-drying-heat"></div>`
               : html`<div class="drum-water ${waterLevelClassClassic}"></div>`}
