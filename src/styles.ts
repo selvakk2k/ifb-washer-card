@@ -283,40 +283,84 @@ export const styles = css`
     overflow: hidden;
   }
 
-  /* Rotating outer progress orbit - mechanical cycle indicator via native SVG dashoffset */
-  .ring-orbit {
-    fill: none;
-    stroke: #ffffff;
-    stroke-width: 4;
-    stroke-linecap: round;
-    stroke-dasharray: 10 26.65;
-    animation: ring-orbit-glide 6.5s linear infinite;
-    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
+  /* Rotating outer drum ring with perimeter baffles (lifter ribs) */
+  .drum-rotor {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
     pointer-events: none;
-    opacity: 0.95;
+    z-index: 1;
+    transform-origin: center center;
+    animation: drum-rotor-spin 6.5s linear infinite;
   }
-  .ring-orbit.fast-spin {
-    animation: ring-orbit-glide 1.8s linear infinite;
-    stroke: #ffffff;
-    stroke-width: 4.5;
-    filter: drop-shadow(0 0 6px #ffffff);
+  .drum-rotor.rinse {
+    animation-duration: 5.5s;
   }
-  .ring-orbit.drying {
-    animation: ring-orbit-glide 4s linear infinite;
-    stroke: #fb923c;
-    filter: drop-shadow(0 0 5px rgba(251, 146, 60, 0.85));
+  .drum-rotor.intermediate-spin {
+    animation-duration: 2.2s;
   }
-  .ring-orbit.paused {
+  .drum-rotor.fast-spin {
+    animation-duration: 1.5s;
+  }
+  .drum-rotor.drying {
+    animation-duration: 4.5s;
+  }
+  .drum-rotor.anti-crease {
+    animation-duration: 10s;
+  }
+  .drum-rotor.steam {
+    animation-duration: 7.5s;
+  }
+  .drum-rotor.soak {
+    animation-duration: 14s;
+  }
+  .drum-rotor.paused {
     animation-play-state: paused;
   }
 
-  @keyframes ring-orbit-glide {
-    from {
-      stroke-dashoffset: 0;
-    }
-    to {
-      stroke-dashoffset: -439.82;
-    }
+  @keyframes drum-rotor-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Subtle circular perimeter rim inside drum */
+  .drum-rotor::before {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border-radius: 50%;
+    border: 1.5px dashed color-mix(in srgb, var(--appliance-accent, #0ea5e9) 40%, rgba(255, 255, 255, 0.2));
+    opacity: 0.6;
+  }
+
+  /* 3 perimeter drum lifter baffles sticking inward from the drum wall */
+  .drum-baffle {
+    position: absolute;
+    width: 8px;
+    height: 12px;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--appliance-accent, #0ea5e9) 75%, #ffffff) 0%,
+      color-mix(in srgb, var(--appliance-surface) 70%, transparent) 100%
+    );
+    border: 1px solid color-mix(in srgb, var(--appliance-accent, #0ea5e9) 80%, #ffffff);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+  }
+  .drum-baffle.baffle-1 {
+    top: 1px;
+    left: calc(50% - 4px);
+  }
+  .drum-baffle.baffle-2 {
+    bottom: 22px;
+    right: 18px;
+    transform: rotate(120deg);
+  }
+  .drum-baffle.baffle-3 {
+    bottom: 22px;
+    left: 18px;
+    transform: rotate(240deg);
   }
 
   /* Drum water layer - raises and lowers according to cycle phase */
@@ -335,7 +379,7 @@ export const styles = css`
     box-shadow: 0 -2px 10px color-mix(in srgb, var(--appliance-accent, #0ea5e9) 40%, transparent);
     transition: height 1.4s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
-    z-index: 1;
+    z-index: 2;
     overflow: hidden;
   }
   .drum-water.fill {

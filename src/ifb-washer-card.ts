@@ -1456,6 +1456,52 @@ export class IFBWasherCard extends LitElement {
       ? 'Done'
       : 'Ready';
 
+    const stateLower = (machineState || '').toLowerCase();
+    const isAntiCrease = isRunning && stateLower.includes('anti-crease');
+    const isIntermediateSpin = isRunning && (stateLower.includes('intermediate spin') || stateLower.includes('intermediate_spin'));
+    const isFinalSpin = isRunning && (stateLower.includes('final spin') || stateLower.includes('spin')) && !isIntermediateSpin;
+    const isSpinning = isIntermediateSpin || isFinalSpin;
+    const isDrying = isRunning && (stateLower.includes('dry') || (stateLower.includes('heat') && !stateLower.includes('wash')));
+    const isDraining = isRunning && stateLower.includes('drain');
+    const isSteam = isRunning && stateLower.includes('steam');
+    const isRinseHold = isRunning && stateLower.includes('rinse hold');
+    const isRinsing = isRunning && stateLower.includes('rinse') && !isRinseHold;
+    const isSoak = isRunning && stateLower.includes('soak');
+    const isFilling = isRunning && (stateLower.includes('fill') || stateLower.includes('inflow') || stateLower.includes('pre-wash') || stateLower.includes('prewash')) && !isSpinning && !isDrying;
+    const isWashing = isRunning && !isDrying && !isRinsing && !isRinseHold && !isSpinning && !isFilling && !isAntiCrease && !isDraining && !isSteam;
+
+    const isSpinningFast = motorRpm > 400;
+
+    const rotorClass = isPaused || isRinseHold
+      ? 'paused'
+      : isFinalSpin || (isSpinning && isSpinningFast)
+      ? 'fast-spin'
+      : isIntermediateSpin
+      ? 'intermediate-spin'
+      : isDrying
+      ? 'drying'
+      : isAntiCrease
+      ? 'anti-crease'
+      : isRinsing
+      ? 'rinse'
+      : isSteam
+      ? 'steam'
+      : isSoak
+      ? 'soak'
+      : isRunning
+      ? ''
+      : 'paused';
+
+    const waterLevelClass = (isAntiCrease || isSpinning || isDrying || isDraining)
+      ? 'empty'
+      : isRinsing || isRinseHold
+      ? 'rinse'
+      : isWashing || isSoak
+      ? 'wash'
+      : isFilling
+      ? 'fill'
+      : 'empty';
+
     const phaseIcon = !isOn
       ? 'mdi:power-off'
       : hasProblem
@@ -1465,13 +1511,25 @@ export class IFBWasherCard extends LitElement {
       : isPaused
       ? 'mdi:pause-circle-outline'
       : isRunning
-      ? (machineState.toLowerCase().includes('spin')
+      ? (isAntiCrease
+          ? 'mdi:tumble-dryer'
+          : isIntermediateSpin
           ? 'mdi:sync'
-          : machineState.toLowerCase().includes('rinse')
+          : isFinalSpin
+          ? 'mdi:sync'
+          : isDraining
+          ? 'mdi:water-pump'
+          : isRinseHold
+          ? 'mdi:pause-circle-outline'
+          : isRinsing
           ? 'mdi:water-sync'
-          : (machineState.toLowerCase().includes('fill') || machineState.toLowerCase().includes('inflow') || machineState.toLowerCase().includes('pre-wash') || machineState.toLowerCase().includes('prewash') || machineState.toLowerCase().includes('soak'))
+          : isSteam
+          ? 'mdi:weather-fog'
+          : isSoak
+          ? 'mdi:water-opacity'
+          : isFilling
           ? 'mdi:water-plus'
-          : machineState.toLowerCase().includes('dry')
+          : isDrying
           ? 'mdi:heat-wave'
           : 'mdi:washing-machine')
       : 'mdi:progress-clock';
@@ -1489,7 +1547,6 @@ export class IFBWasherCard extends LitElement {
     const radius = 70;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (progressPct / 100) * circumference;
-    const isSpinningFast = motorRpm > 400;
 
     const programBadge = !isOn
       ? ''
@@ -1508,29 +1565,6 @@ export class IFBWasherCard extends LitElement {
       }
       return parts.length > 0 ? parts.join(' • ') : null;
     })();
-
-    const stateLower = (machineState || '').toLowerCase();
-    const isDrying = isRunning && (stateLower.includes('dry') || stateLower.includes('heat'));
-    const isSpinning = isRunning && stateLower.includes('spin');
-    const isFilling = isRunning && (stateLower.includes('fill') || stateLower.includes('inflow') || stateLower.includes('pre-wash') || stateLower.includes('prewash') || stateLower.includes('soak')) && !isDrying && !isSpinning;
-    const isRinsing = isRunning && stateLower.includes('rinse') && !isDrying && !isSpinning;
-    const isWashing = isRunning && !isDrying && !isRinsing && !isSpinning && !isFilling;
-
-    const waterLevelClass = isFilling
-      ? 'fill'
-      : isRinsing
-      ? 'rinse'
-      : isWashing
-      ? 'wash'
-      : 'empty';
-
-    const orbitSpeedClass = isSpinningFast || isSpinning
-      ? 'fast-spin'
-      : isDrying
-      ? 'drying'
-      : isPaused
-      ? 'paused'
-      : '';
 
     return html`
       <ha-card class="gh-full-card ${!isOn ? 'is-off' : ''}">
@@ -1566,8 +1600,8 @@ export class IFBWasherCard extends LitElement {
           </div>
         </div>
 
-        <!-- M3 Porthole & Radial Progress Dial with Flanks -->
-        <div class="porthole-container ${!isOn ? 'disabled' : ''}">
+        <!-- Hero Dial with Flanks (Porthole + Child Lock & Phase Badges) -->
+        <div class="gh-hero-container ${!isOn ? 'disabled' : ''}">
           <!-- Left Flank: Child Lock -->
           <div
             class="dial-flank child-lock-flank ${isChildLockActive ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"
@@ -1609,23 +1643,21 @@ export class IFBWasherCard extends LitElement {
                       r="${radius}"
                       style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${strokeDashoffset};"
                     />
-                    ${isRunning
-                      ? html`
-                          <circle
-                            class="ring-orbit ${orbitSpeedClass}"
-                            cx="82"
-                            cy="82"
-                            r="${radius}"
-                          />
-                        `
-                      : nothing}
                   `
                 : nothing}
             </svg>
             <div class="drum-porthole">
-              ${isDrying
-                ? html`<div class="drum-drying-heat"></div>`
-                : html`<div class="drum-water ${waterLevelClass}"></div>`}
+              ${isRunning
+                ? html`
+                    <div class="drum-rotor ${rotorClass}">
+                      <div class="drum-baffle baffle-1"></div>
+                      <div class="drum-baffle baffle-2"></div>
+                      <div class="drum-baffle baffle-3"></div>
+                    </div>
+                  `
+                : nothing}
+              ${isDrying ? html`<div class="drum-drying-heat"></div>` : nothing}
+              <div class="drum-water ${waterLevelClass}"></div>
               <div class="porthole-content">
                 <div class="porthole-hero-time">
                   ${displayValue}
@@ -2078,6 +2110,50 @@ export class IFBWasherCard extends LitElement {
       ? 'Done'
       : 'Ready';
 
+    const stateLowerClassic = (machineState || '').toLowerCase();
+    const isAntiCreaseClassic = isRunning && stateLowerClassic.includes('anti-crease');
+    const isIntermediateSpinClassic = isRunning && (stateLowerClassic.includes('intermediate spin') || stateLowerClassic.includes('intermediate_spin'));
+    const isFinalSpinClassic = isRunning && (stateLowerClassic.includes('final spin') || stateLowerClassic.includes('spin')) && !isIntermediateSpinClassic;
+    const isSpinningClassic = isIntermediateSpinClassic || isFinalSpinClassic;
+    const isDryingClassic = isRunning && (stateLowerClassic.includes('dry') || (stateLowerClassic.includes('heat') && !stateLowerClassic.includes('wash')));
+    const isDrainingClassic = isRunning && stateLowerClassic.includes('drain');
+    const isSteamClassic = isRunning && stateLowerClassic.includes('steam');
+    const isRinseHoldClassic = isRunning && stateLowerClassic.includes('rinse hold');
+    const isRinsingClassic = isRunning && stateLowerClassic.includes('rinse') && !isRinseHoldClassic;
+    const isSoakClassic = isRunning && stateLowerClassic.includes('soak');
+    const isFillingClassic = isRunning && (stateLowerClassic.includes('fill') || stateLowerClassic.includes('inflow') || stateLowerClassic.includes('pre-wash') || stateLowerClassic.includes('prewash')) && !isSpinningClassic && !isDryingClassic;
+    const isWashingClassic = isRunning && !isDryingClassic && !isRinsingClassic && !isRinseHoldClassic && !isSpinningClassic && !isFillingClassic && !isAntiCreaseClassic && !isDrainingClassic && !isSteamClassic;
+
+    const rotorClassClassic = isPaused || isRinseHoldClassic
+      ? 'paused'
+      : isFinalSpinClassic || (isSpinningClassic && isSpinningFast)
+      ? 'fast-spin'
+      : isIntermediateSpinClassic
+      ? 'intermediate-spin'
+      : isDryingClassic
+      ? 'drying'
+      : isAntiCreaseClassic
+      ? 'anti-crease'
+      : isRinsingClassic
+      ? 'rinse'
+      : isSteamClassic
+      ? 'steam'
+      : isSoakClassic
+      ? 'soak'
+      : isRunning
+      ? ''
+      : 'paused';
+
+    const waterLevelClassClassic = (isAntiCreaseClassic || isSpinningClassic || isDryingClassic || isDrainingClassic)
+      ? 'empty'
+      : isRinsingClassic || isRinseHoldClassic
+      ? 'rinse'
+      : isWashingClassic || isSoakClassic
+      ? 'wash'
+      : isFillingClassic
+      ? 'fill'
+      : 'empty';
+
     const phaseIcon = !isOn
       ? 'mdi:power-off'
       : hasProblem
@@ -2087,13 +2163,25 @@ export class IFBWasherCard extends LitElement {
       : isPaused
       ? 'mdi:pause-circle-outline'
       : isRunning
-      ? (machineState.toLowerCase().includes('spin')
+      ? (isAntiCreaseClassic
+          ? 'mdi:tumble-dryer'
+          : isIntermediateSpinClassic
           ? 'mdi:sync'
-          : machineState.toLowerCase().includes('rinse')
+          : isFinalSpinClassic
+          ? 'mdi:sync'
+          : isDrainingClassic
+          ? 'mdi:water-pump'
+          : isRinseHoldClassic
+          ? 'mdi:pause-circle-outline'
+          : isRinsingClassic
           ? 'mdi:water-sync'
-          : (machineState.toLowerCase().includes('fill') || machineState.toLowerCase().includes('inflow') || machineState.toLowerCase().includes('pre-wash') || machineState.toLowerCase().includes('prewash') || machineState.toLowerCase().includes('soak'))
+          : isSteamClassic
+          ? 'mdi:weather-fog'
+          : isSoakClassic
+          ? 'mdi:water-opacity'
+          : isFillingClassic
           ? 'mdi:water-plus'
-          : machineState.toLowerCase().includes('dry')
+          : isDryingClassic
           ? 'mdi:heat-wave'
           : 'mdi:washing-machine')
       : 'mdi:progress-clock';
@@ -2125,29 +2213,6 @@ export class IFBWasherCard extends LitElement {
       }
       return parts.length > 0 ? parts.join(' • ') : null;
     })();
-
-    const stateLowerClassic = (machineState || '').toLowerCase();
-    const isDryingClassic = isRunning && (stateLowerClassic.includes('dry') || stateLowerClassic.includes('heat'));
-    const isSpinningClassic = isRunning && stateLowerClassic.includes('spin');
-    const isFillingClassic = isRunning && (stateLowerClassic.includes('fill') || stateLowerClassic.includes('inflow') || stateLowerClassic.includes('pre-wash') || stateLowerClassic.includes('prewash') || stateLowerClassic.includes('soak')) && !isDryingClassic && !isSpinningClassic;
-    const isRinsingClassic = isRunning && stateLowerClassic.includes('rinse') && !isDryingClassic && !isSpinningClassic;
-    const isWashingClassic = isRunning && !isDryingClassic && !isRinsingClassic && !isSpinningClassic && !isFillingClassic;
-
-    const waterLevelClassClassic = isFillingClassic
-      ? 'fill'
-      : isRinsingClassic
-      ? 'rinse'
-      : isWashingClassic
-      ? 'wash'
-      : 'empty';
-
-    const orbitSpeedClassClassic = isSpinningFast || isSpinningClassic
-      ? 'fast-spin'
-      : isDryingClassic
-      ? 'drying'
-      : isPaused
-      ? 'paused'
-      : '';
 
     return html`
       <!-- Porthole & Radial Progress Ring with Dial Flanks -->
@@ -2193,20 +2258,19 @@ export class IFBWasherCard extends LitElement {
                     r="${radius}"
                     style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${strokeDashoffset};"
                   />
-                  ${isRunning
-                    ? html`
-                        <circle
-                          class="ring-orbit ${orbitSpeedClassClassic}"
-                          cx="82"
-                          cy="82"
-                          r="${radius}"
-                        />
-                      `
-                    : nothing}
                 `
               : nothing}
           </svg>
           <div class="drum-porthole">
+            ${isRunning
+              ? html`
+                  <div class="drum-rotor ${rotorClassClassic}">
+                    <div class="drum-baffle baffle-1"></div>
+                    <div class="drum-baffle baffle-2"></div>
+                    <div class="drum-baffle baffle-3"></div>
+                  </div>
+                `
+              : nothing}
             ${isDryingClassic
               ? html`<div class="drum-drying-heat"></div>`
               : html`<div class="drum-water ${waterLevelClassClassic}"></div>`}
