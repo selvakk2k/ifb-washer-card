@@ -294,6 +294,17 @@ const HELP_DESCRIPTIONS: Record<string, string> = {
   '6 Hours': 'Timed condensation drying for 6 hours.',
 };
 
+const SIMULATED_STAGES = [
+  { state: 'Filling', remMinutes: 50, motorRpm: 0, tubTemp: 20, progressPct: 10, program: 'Cotton Normal', spin: '1000 RPM', temp: '40°C', childLock: false, doorLocked: true },
+  { state: 'Washing', remMinutes: 42, motorRpm: 800, tubTemp: 40, progressPct: 35, program: 'Cotton Normal', spin: '1000 RPM', temp: '40°C', childLock: false, doorLocked: true },
+  { state: 'Rinsing', remMinutes: 25, motorRpm: 800, tubTemp: 20, progressPct: 55, program: 'Cotton Normal', spin: '1000 RPM', temp: '20°C', childLock: false, doorLocked: true },
+  { state: 'Intermediate Spin', remMinutes: 20, motorRpm: 1000, tubTemp: 20, progressPct: 68, program: 'Cotton Normal', spin: '1000 RPM', temp: '20°C', childLock: false, doorLocked: true },
+  { state: 'Final Spin', remMinutes: 12, motorRpm: 1200, tubTemp: 20, progressPct: 80, program: 'Cotton Normal', spin: '1200 RPM', temp: '20°C', childLock: false, doorLocked: true },
+  { state: 'Drying', remMinutes: 30, motorRpm: 400, tubTemp: 60, progressPct: 90, program: 'Dry 30', spin: '0 RPM', temp: '60°C', childLock: false, doorLocked: true },
+  { state: 'Anti-crease', remMinutes: 5, motorRpm: 50, tubTemp: 25, progressPct: 98, program: 'Cotton Normal', spin: '0 RPM', temp: '25°C', childLock: false, doorLocked: true },
+  { state: 'Complete', remMinutes: 0, motorRpm: 0, tubTemp: 25, progressPct: 100, program: 'Cotton Normal', spin: '1000 RPM', temp: '40°C', childLock: false, doorLocked: false },
+];
+
 export class IFBWasherCard extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config!: IFBWasherCardConfig;
@@ -303,6 +314,25 @@ export class IFBWasherCard extends LitElement {
 
   private _longPressTimer: any = null;
   private _isLongPress = false;
+  private _simulateTimer: any = null;
+  private _simulateStageIndex = 0;
+
+  private _startSimulateTimer(): void {
+    if (!this._config?.simulate || this._simulateTimer) {
+      return;
+    }
+    this._simulateTimer = setInterval(() => {
+      this._simulateStageIndex = (this._simulateStageIndex + 1) % SIMULATED_STAGES.length;
+      this.requestUpdate();
+    }, 6000);
+  }
+
+  private _stopSimulateTimer(): void {
+    if (this._simulateTimer) {
+      clearInterval(this._simulateTimer);
+      this._simulateTimer = null;
+    }
+  }
 
   private _handleTouchStart(text: string) {
     this._isLongPress = false;
@@ -333,9 +363,11 @@ export class IFBWasherCard extends LitElement {
   connectedCallback(): void {
     super.connectedCallback();
     window.addEventListener('click', this._handleWindowClick);
+    this._startSimulateTimer();
   }
 
   disconnectedCallback(): void {
+    this._stopSimulateTimer();
     window.removeEventListener('click', this._handleWindowClick);
     super.disconnectedCallback();
   }
@@ -358,6 +390,11 @@ export class IFBWasherCard extends LitElement {
   protected updated(changedProps: PropertyValues): void {
     super.updated(changedProps);
     if (changedProps.has('_config')) {
+      if (this._config?.simulate) {
+        this._startSimulateTimer();
+      } else {
+        this._stopSimulateTimer();
+      }
       const theme = this._config?.theme || 'default';
       if (theme === 'default') {
         this.removeAttribute('theme');
@@ -853,7 +890,9 @@ export class IFBWasherCard extends LitElement {
     const doorObj = entities.door ? this.hass.states[entities.door] : undefined;
     const problemObj = entities.problem ? this.hass.states[entities.problem] : undefined;
 
-    if (!powerState && !machineStateObj && !programObj) {
+    const isSimulating = Boolean(this._config?.simulate);
+
+    if (!isSimulating && !powerState && !machineStateObj && !programObj) {
       const explicitId = this._config?.entity;
       return html`
         <ha-card class="ifb-washer-card">
@@ -870,12 +909,19 @@ export class IFBWasherCard extends LitElement {
       `;
     }
 
-    const isOnline = Boolean(
-      powerState && powerState.state !== 'unavailable' && powerState.state !== 'unknown'
-    );
-    const isOn = isOnline && powerState?.state === 'on';
+    const sim = isSimulating
+      ? SIMULATED_STAGES[this._simulateStageIndex % SIMULATED_STAGES.length]
+      : null;
 
-    const machineState = machineStateObj?.state || (isOn ? 'Standby' : 'Off');
+    const isOnline = isSimulating
+      ? true
+      : Boolean(powerState && powerState.state !== 'unavailable' && powerState.state !== 'unknown');
+    const isOn = isSimulating ? true : (isOnline && powerState?.state === 'on');
+
+    const machineState = sim
+      ? sim.state
+      : (machineStateObj?.state || (isOn ? 'Standby' : 'Off'));
+
     const isRunning =
       isOn &&
       Boolean(
@@ -884,20 +930,28 @@ export class IFBWasherCard extends LitElement {
             machineState
           )
       );
-    const isPaused = isOn && machineState === 'Paused';
-    const isComplete = isOn && machineState === 'Complete';
+    const isPaused = !sim && isOn && machineState === 'Paused';
+    const isComplete = (sim ? sim.state === 'Complete' : (isOn && machineState === 'Complete'));
 
-    const remMinutes = remainingObj ? parseInt(remainingObj.state, 10) || 0 : 0;
-    const progressPct = progressObj ? Math.min(100, Math.max(0, parseFloat(progressObj.state) || 0)) : 0;
-    const currentProgram = programObj?.state || '';
-    const currentSpin = spinObj?.state || '';
-    const currentTemp = tempObj?.state || '';
-    const currentDelay = delayObj?.state || 'No Delay';
-    const isChildLockActive = childLockObj?.state === 'on';
-    const isDoorLocked = doorObj?.state === 'off' || doorObj?.attributes?.door_locked === true;
-    const hasProblem = problemObj?.state === 'on';
-    const tubTemp = tubTempObj ? parseInt(tubTempObj.state, 10) || 0 : 0;
-    const motorRpm = rpmObj ? parseInt(rpmObj.state, 10) || 0 : 0;
+    const remMinutes = sim
+      ? sim.remMinutes
+      : (remainingObj ? parseInt(remainingObj.state, 10) || 0 : 0);
+
+    const progressPct = sim
+      ? sim.progressPct
+      : (progressObj ? Math.min(100, Math.max(0, parseFloat(progressObj.state) || 0)) : 0);
+
+    const currentProgram = sim ? sim.program : (programObj?.state || '');
+    const currentSpin = sim ? sim.spin : (spinObj?.state || '');
+    const currentTemp = sim ? sim.temp : (tempObj?.state || '');
+    const currentDelay = sim ? 'No Delay' : (delayObj?.state || 'No Delay');
+    const isChildLockActive = sim ? sim.childLock : (childLockObj?.state === 'on');
+    const isDoorLocked = sim
+      ? sim.doorLocked
+      : (doorObj?.state === 'off' || doorObj?.attributes?.door_locked === true);
+    const hasProblem = !sim && problemObj?.state === 'on';
+    const tubTemp = sim ? sim.tubTemp : (tubTempObj ? parseInt(tubTempObj.state, 10) || 0 : 0);
+    const motorRpm = sim ? sim.motorRpm : (rpmObj ? parseInt(rpmObj.state, 10) || 0 : 0);
 
     // Resolve clean device title
     let autoTitle = '';
