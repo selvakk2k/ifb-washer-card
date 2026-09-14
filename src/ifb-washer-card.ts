@@ -1507,6 +1507,26 @@ export class IFBWasherCard extends LitElement {
       return parts.length > 0 ? parts.join(' • ') : null;
     })();
 
+    const stateLower = (machineState || '').toLowerCase();
+    const isDrying = isRunning && (stateLower.includes('dry') || stateLower.includes('heat'));
+    const isRinsing = isRunning && stateLower.includes('rinse');
+    const isSpinning = isRunning && stateLower.includes('spin');
+    const isWashing = isRunning && !isDrying && !isRinsing && !isSpinning;
+
+    const waterLevelClass = isRinsing
+      ? 'rinse'
+      : isWashing
+      ? 'wash'
+      : 'empty';
+
+    const orbitSpeedClass = isSpinningFast || isSpinning
+      ? 'fast-spin'
+      : isDrying
+      ? 'drying'
+      : isPaused
+      ? 'paused'
+      : '';
+
     return html`
       <ha-card class="gh-full-card ${!isOn ? 'is-off' : ''}">
         <!-- Header -->
@@ -1584,28 +1604,23 @@ export class IFBWasherCard extends LitElement {
                       r="${radius}"
                       style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${strokeDashoffset};"
                     />
+                    ${isRunning
+                      ? html`
+                          <circle
+                            class="ring-orbit ${orbitSpeedClass}"
+                            cx="82"
+                            cy="82"
+                            r="${radius}"
+                          />
+                        `
+                      : nothing}
                   `
                 : nothing}
             </svg>
             <div class="drum-porthole">
-              ${isRunning
-                ? html`
-                    <div class="drum-water-swirl ${isSpinningFast ? 'fast-spin' : ''}"></div>
-                    <div class="drum-baffles ${isSpinningFast ? 'fast-spin' : 'spinning'}">
-                      <span class="baffle"></span>
-                      <span class="baffle"></span>
-                      <span class="baffle"></span>
-                    </div>
-                  `
-                : isPaused
-                ? html`
-                    <div class="drum-baffles paused">
-                      <span class="baffle"></span>
-                      <span class="baffle"></span>
-                      <span class="baffle"></span>
-                    </div>
-                  `
-                : nothing}
+              ${isDrying
+                ? html`<div class="drum-drying-heat"></div>`
+                : html`<div class="drum-water ${waterLevelClass}"></div>`}
               <div class="porthole-content">
                 <div class="porthole-hero-time">
                   ${displayValue}
@@ -2104,6 +2119,26 @@ export class IFBWasherCard extends LitElement {
       return parts.length > 0 ? parts.join(' • ') : null;
     })();
 
+    const stateLowerClassic = (machineState || '').toLowerCase();
+    const isDryingClassic = isRunning && (stateLowerClassic.includes('dry') || stateLowerClassic.includes('heat'));
+    const isRinsingClassic = isRunning && stateLowerClassic.includes('rinse');
+    const isSpinningClassic = isRunning && stateLowerClassic.includes('spin');
+    const isWashingClassic = isRunning && !isDryingClassic && !isRinsingClassic && !isSpinningClassic;
+
+    const waterLevelClassClassic = isRinsingClassic
+      ? 'rinse'
+      : isWashingClassic
+      ? 'wash'
+      : 'empty';
+
+    const orbitSpeedClassClassic = isSpinningFast || isSpinningClassic
+      ? 'fast-spin'
+      : isDryingClassic
+      ? 'drying'
+      : isPaused
+      ? 'paused'
+      : '';
+
     return html`
       <!-- Porthole & Radial Progress Ring with Dial Flanks -->
       <div class="porthole-container ${!isOn ? 'disabled' : ''}">
@@ -2148,28 +2183,23 @@ export class IFBWasherCard extends LitElement {
                     r="${radius}"
                     style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${strokeDashoffset};"
                   />
+                  ${isRunning
+                    ? html`
+                        <circle
+                          class="ring-orbit ${orbitSpeedClassClassic}"
+                          cx="82"
+                          cy="82"
+                          r="${radius}"
+                        />
+                      `
+                    : nothing}
                 `
               : nothing}
           </svg>
           <div class="drum-porthole">
-            ${isRunning
-              ? html`
-                  <div class="drum-water-swirl ${isSpinningFast ? 'fast-spin' : ''}"></div>
-                  <div class="drum-baffles ${isSpinningFast ? 'fast-spin' : 'spinning'}">
-                    <span class="baffle"></span>
-                    <span class="baffle"></span>
-                    <span class="baffle"></span>
-                  </div>
-                `
-              : isPaused
-              ? html`
-                  <div class="drum-baffles paused">
-                    <span class="baffle"></span>
-                    <span class="baffle"></span>
-                    <span class="baffle"></span>
-                  </div>
-                `
-              : nothing}
+            ${isDryingClassic
+              ? html`<div class="drum-drying-heat"></div>`
+              : html`<div class="drum-water ${waterLevelClassClassic}"></div>`}
             <div class="porthole-content">
               <div class="porthole-hero-time">
                 ${displayValue}

@@ -283,68 +283,102 @@ export const styles = css`
     overflow: hidden;
   }
 
-  /* Drum water swirl effect */
-  .drum-water-swirl {
-    position: absolute;
-    inset: 2px;
-    border-radius: 50%;
-    background: conic-gradient(
-      from 0deg,
-      transparent 0deg,
-      color-mix(in srgb, var(--appliance-accent) 22%, transparent) 90deg,
-      transparent 180deg,
-      color-mix(in srgb, var(--appliance-accent) 15%, transparent) 270deg,
-      transparent 360deg
-    );
-    opacity: 0.65;
+  /* Rotating outer progress orbit - mechanical cycle indicator */
+  .ring-orbit {
+    fill: none;
+    stroke: color-mix(in srgb, var(--appliance-accent, #0ea5e9) 80%, #ffffff);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 10 26;
+    transform-origin: 82px 82px;
+    animation: ring-orbit-spin 6.5s linear infinite;
     pointer-events: none;
-    animation: drum-spin 3.2s linear infinite;
+    opacity: 0.9;
   }
-  .drum-water-swirl.fast-spin {
-    animation: drum-spin 0.75s linear infinite;
+  .ring-orbit.fast-spin {
+    animation: ring-orbit-spin 1.8s linear infinite;
+    stroke: #ffffff;
+    stroke-width: 3.5;
+  }
+  .ring-orbit.drying {
+    animation: ring-orbit-spin 4s linear infinite;
+    stroke: #fb923c;
+  }
+  .ring-orbit.paused {
+    animation-play-state: paused;
   }
 
-  /* Drum rotation baffles - 3 mechanical perimeter paddles */
-  .drum-baffles {
+  @keyframes ring-orbit-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Drum water layer - raises and lowers according to cycle phase */
+  .drum-water {
     position: absolute;
-    inset: 0;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    height: 100%;
-    border-radius: 50%;
+    height: 0%;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--appliance-accent, #0ea5e9) 45%, rgba(14, 165, 233, 0.45)) 0%,
+      color-mix(in srgb, var(--appliance-accent, #0ea5e9) 70%, rgba(2, 132, 199, 0.75)) 100%
+    );
+    transition: height 1.4s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
     z-index: 1;
   }
-  .drum-baffles.spinning {
-    animation: drum-spin 2.8s linear infinite;
+  .drum-water.wash {
+    height: 42%;
   }
-  .drum-baffles.fast-spin {
-    animation: drum-spin 0.7s linear infinite;
+  .drum-water.rinse {
+    height: 58%;
   }
-  .drum-baffles.paused {
-    animation-play-state: paused;
+  .drum-water.empty {
+    height: 0%;
   }
-  .drum-baffles .baffle {
+  .drum-water::before {
+    content: '';
     position: absolute;
-    top: 6px;
-    left: calc(50% - 4px);
-    width: 8px;
-    height: 20px;
-    background: color-mix(in srgb, var(--appliance-accent) 55%, var(--appliance-text-1));
-    border-radius: 4px;
-    transform-origin: 4px 64px;
-    box-shadow: 0 0 6px color-mix(in srgb, var(--appliance-accent) 35%, transparent);
-    opacity: 0.75;
+    top: -8px;
+    left: -50%;
+    width: 200%;
+    height: 16px;
+    background-repeat: repeat-x;
+    background-image: radial-gradient(ellipse at 50% 100%, transparent 55%, color-mix(in srgb, var(--appliance-accent, #0ea5e9) 45%, rgba(14, 165, 233, 0.45)) 58%);
+    background-size: 32px 16px;
+    animation: water-undulation 4s ease-in-out infinite alternate;
   }
-  .drum-baffles .baffle:nth-child(1) {
-    transform: rotate(0deg);
-  }
-  .drum-baffles .baffle:nth-child(2) {
-    transform: rotate(120deg);
-  }
-  .drum-baffles .baffle:nth-child(3) {
-    transform: rotate(240deg);
+  @keyframes water-undulation {
+    from { transform: translateX(0); }
+    to { transform: translateX(16px); }
   }
 
+  /* Drying cycle thermal shimmer */
+  .drum-drying-heat {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 50% 60%,
+      rgba(251, 146, 60, 0.32) 0%,
+      rgba(245, 158, 11, 0.16) 50%,
+      transparent 80%
+    );
+    pointer-events: none;
+    z-index: 1;
+    animation: heat-glow 3s ease-in-out infinite alternate;
+  }
+  @keyframes heat-glow {
+    from { opacity: 0.45; transform: scale(0.97); }
+    to { opacity: 0.9; transform: scale(1.02); }
+  }
+
+  /* Drum rotation baffles - legacy compatibility */
+  .drum-baffles {
+    display: none;
+  }
   @keyframes drum-spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
