@@ -413,6 +413,12 @@ export class IFBWasherCard extends LitElement {
       } else {
         this.style.removeProperty('--appliance-bg');
       }
+
+      if (this._config?.water_color) {
+        this.style.setProperty('--appliance-water-color', this._config.water_color);
+      } else {
+        this.style.removeProperty('--appliance-water-color');
+      }
     }
   }
 

@@ -283,7 +283,7 @@ export const styles = css`
     overflow: hidden;
   }
 
-  /* Drum water layer - raises and lowers according to cycle phase */
+  /* Drum water layer - dynamically matches theme accent */
   .drum-water {
     position: absolute;
     bottom: 0;
@@ -292,11 +292,11 @@ export const styles = css`
     height: 0%;
     background: linear-gradient(
       180deg,
-      color-mix(in srgb, var(--appliance-accent, #0ea5e9) 35%, rgba(14, 165, 233, 0.35)) 0%,
-      color-mix(in srgb, var(--appliance-accent, #0ea5e9) 65%, rgba(2, 132, 199, 0.65)) 100%
+      color-mix(in srgb, var(--appliance-water-color, var(--appliance-accent)) 26%, transparent) 0%,
+      color-mix(in srgb, var(--appliance-water-color, var(--appliance-accent)) 56%, transparent) 100%
     );
-    border-top: 1.5px solid color-mix(in srgb, var(--appliance-accent, #0ea5e9) 75%, #ffffff);
-    box-shadow: 0 -2px 10px color-mix(in srgb, var(--appliance-accent, #0ea5e9) 40%, transparent);
+    border-top: 1.5px solid color-mix(in srgb, var(--appliance-water-color, var(--appliance-accent)) 70%, #ffffff);
+    box-shadow: 0 -2px 12px color-mix(in srgb, var(--appliance-water-color, var(--appliance-accent)) 35%, transparent);
     transition: height 1.4s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
     z-index: 2;

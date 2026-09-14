@@ -1,6 +1,6 @@
 {
   "name": "ifb-washer-card",
-  "version": "1.0.0-beta.5",
+  "version": "1.0.0-beta.6",
   "description": "A premium custom Lovelace card for the IFB Washer Local integration.",
   "type": "module",
   "main": "dist/ifb-washer-card.js",
