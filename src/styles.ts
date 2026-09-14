@@ -283,34 +283,40 @@ export const styles = css`
     overflow: hidden;
   }
 
-  /* Rotating outer progress orbit - mechanical cycle indicator */
+  /* Rotating outer progress orbit - mechanical cycle indicator via native SVG dashoffset */
   .ring-orbit {
     fill: none;
-    stroke: color-mix(in srgb, var(--appliance-accent, #0ea5e9) 80%, #ffffff);
-    stroke-width: 3;
+    stroke: #ffffff;
+    stroke-width: 4;
     stroke-linecap: round;
-    stroke-dasharray: 10 26;
-    transform-origin: 82px 82px;
-    animation: ring-orbit-spin 6.5s linear infinite;
+    stroke-dasharray: 10 26.65;
+    animation: ring-orbit-glide 6.5s linear infinite;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
     pointer-events: none;
-    opacity: 0.9;
+    opacity: 0.95;
   }
   .ring-orbit.fast-spin {
-    animation: ring-orbit-spin 1.8s linear infinite;
+    animation: ring-orbit-glide 1.8s linear infinite;
     stroke: #ffffff;
-    stroke-width: 3.5;
+    stroke-width: 4.5;
+    filter: drop-shadow(0 0 6px #ffffff);
   }
   .ring-orbit.drying {
-    animation: ring-orbit-spin 4s linear infinite;
+    animation: ring-orbit-glide 4s linear infinite;
     stroke: #fb923c;
+    filter: drop-shadow(0 0 5px rgba(251, 146, 60, 0.85));
   }
   .ring-orbit.paused {
     animation-play-state: paused;
   }
 
-  @keyframes ring-orbit-spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+  @keyframes ring-orbit-glide {
+    from {
+      stroke-dashoffset: 0;
+    }
+    to {
+      stroke-dashoffset: -439.82;
+    }
   }
 
   /* Drum water layer - raises and lowers according to cycle phase */
