@@ -1578,7 +1578,7 @@ export class IFBWasherCard extends LitElement {
               ${isRunning || isComplete
                 ? html`
                     <circle
-                      class="ring-progress"
+                      class="ring-progress ${isRunning ? 'active' : ''}"
                       cx="82"
                       cy="82"
                       r="${radius}"
@@ -1589,7 +1589,22 @@ export class IFBWasherCard extends LitElement {
             </svg>
             <div class="drum-porthole">
               ${isRunning
-                ? html`<div class="drum-baffles ${isSpinningFast ? 'fast-spin' : 'spinning'}"></div>`
+                ? html`
+                    <div class="drum-water-swirl ${isSpinningFast ? 'fast-spin' : ''}"></div>
+                    <div class="drum-baffles ${isSpinningFast ? 'fast-spin' : 'spinning'}">
+                      <span class="baffle"></span>
+                      <span class="baffle"></span>
+                      <span class="baffle"></span>
+                    </div>
+                  `
+                : isPaused
+                ? html`
+                    <div class="drum-baffles paused">
+                      <span class="baffle"></span>
+                      <span class="baffle"></span>
+                      <span class="baffle"></span>
+                    </div>
+                  `
                 : nothing}
               <div class="porthole-content">
                 <div class="porthole-hero-time">
@@ -2127,7 +2142,7 @@ export class IFBWasherCard extends LitElement {
             ${isRunning || isComplete
               ? html`
                   <circle
-                    class="ring-progress"
+                    class="ring-progress ${isRunning ? 'active' : ''}"
                     cx="82"
                     cy="82"
                     r="${radius}"
@@ -2138,7 +2153,22 @@ export class IFBWasherCard extends LitElement {
           </svg>
           <div class="drum-porthole">
             ${isRunning
-              ? html`<div class="drum-baffles ${isSpinningFast ? 'fast-spin' : 'spinning'}"></div>`
+              ? html`
+                  <div class="drum-water-swirl ${isSpinningFast ? 'fast-spin' : ''}"></div>
+                  <div class="drum-baffles ${isSpinningFast ? 'fast-spin' : 'spinning'}">
+                    <span class="baffle"></span>
+                    <span class="baffle"></span>
+                    <span class="baffle"></span>
+                  </div>
+                `
+              : isPaused
+              ? html`
+                  <div class="drum-baffles paused">
+                    <span class="baffle"></span>
+                    <span class="baffle"></span>
+                    <span class="baffle"></span>
+                  </div>
+                `
               : nothing}
             <div class="porthole-content">
               <div class="porthole-hero-time">

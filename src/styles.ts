@@ -263,6 +263,11 @@ export const styles = css`
   }
   .ring-progress.active {
     filter: drop-shadow(0 0 6px color-mix(in srgb, var(--appliance-accent) 60%, transparent));
+    animation: ring-glow 2s ease-in-out infinite alternate;
+  }
+  @keyframes ring-glow {
+    from { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--appliance-accent) 30%, transparent)); }
+    to { filter: drop-shadow(0 0 8px color-mix(in srgb, var(--appliance-accent) 70%, transparent)); }
   }
   .drum-porthole {
     width: 140px;
@@ -278,35 +283,66 @@ export const styles = css`
     overflow: hidden;
   }
 
-  /* Drum rotation baffles - mechanical wash animation without arrows */
+  /* Drum water swirl effect */
+  .drum-water-swirl {
+    position: absolute;
+    inset: 2px;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      color-mix(in srgb, var(--appliance-accent) 22%, transparent) 90deg,
+      transparent 180deg,
+      color-mix(in srgb, var(--appliance-accent) 15%, transparent) 270deg,
+      transparent 360deg
+    );
+    opacity: 0.65;
+    pointer-events: none;
+    animation: drum-spin 3.2s linear infinite;
+  }
+  .drum-water-swirl.fast-spin {
+    animation: drum-spin 0.75s linear infinite;
+  }
+
+  /* Drum rotation baffles - 3 mechanical perimeter paddles */
   .drum-baffles {
     position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     pointer-events: none;
-    opacity: 0.12;
+    z-index: 1;
   }
   .drum-baffles.spinning {
-    animation: drum-spin 2.5s linear infinite;
+    animation: drum-spin 2.8s linear infinite;
   }
   .drum-baffles.fast-spin {
     animation: drum-spin 0.7s linear infinite;
   }
-  .drum-baffles::before,
-  .drum-baffles::after {
-    content: '';
-    position: absolute;
-    width: 2px;
-    height: 84%;
-    background: var(--appliance-text-1);
-    border-radius: 2px;
+  .drum-baffles.paused {
+    animation-play-state: paused;
   }
-  .drum-baffles::after {
-    transform: rotate(60deg);
+  .drum-baffles .baffle {
+    position: absolute;
+    top: 6px;
+    left: calc(50% - 4px);
+    width: 8px;
+    height: 20px;
+    background: color-mix(in srgb, var(--appliance-accent) 55%, var(--appliance-text-1));
+    border-radius: 4px;
+    transform-origin: 4px 64px;
+    box-shadow: 0 0 6px color-mix(in srgb, var(--appliance-accent) 35%, transparent);
+    opacity: 0.75;
+  }
+  .drum-baffles .baffle:nth-child(1) {
+    transform: rotate(0deg);
+  }
+  .drum-baffles .baffle:nth-child(2) {
+    transform: rotate(120deg);
+  }
+  .drum-baffles .baffle:nth-child(3) {
+    transform: rotate(240deg);
   }
 
   @keyframes drum-spin {
