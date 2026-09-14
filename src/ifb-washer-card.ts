@@ -387,6 +387,19 @@ export class IFBWasherCard extends LitElement {
   public static getConfigForm() {
     return {
       schema: [
+        {
+          name: 'entity',
+          label: 'Washing Machine Entity (Auto-Discovered if blank)',
+          selector: {
+            entity: {
+              filter: [
+                { domain: 'switch' },
+                { domain: 'sensor' },
+                { domain: 'select' },
+              ],
+            },
+          },
+        },
         { name: 'name', label: 'Custom Title (Auto-discovered if blank)', selector: { text: {} } },
         {
           name: 'theme',
@@ -556,14 +569,17 @@ export class IFBWasherCard extends LitElement {
     // If no entity was explicitly provided, auto-discover any IFB washer entity to anchor device discovery
     if (!rawId && this.hass?.states) {
       const stateKeys = Object.keys(this.hass.states);
+      const reg = (this.hass as any)?.entities;
       rawId =
+        (reg && stateKeys.find((id) => reg[id]?.platform === 'ifb_washer_local')) ||
+        stateKeys.find((id) => id.startsWith('sensor.') && (id.endsWith('_machine_state') || id.includes('washing_machine_machine_state'))) ||
         stateKeys.find(
-          (id) => id.startsWith('switch.') && (id.includes('_power') || id.includes('ifb_washer'))
+          (id) => id.startsWith('switch.') && (id.includes('washing_machine') || id.includes('ifb_washer'))
         ) ||
         stateKeys.find(
-          (id) => id.startsWith('select.') && (id.includes('_program') || id.includes('ifb_washer'))
+          (id) => id.startsWith('select.') && (id.includes('washing_machine') || id.includes('ifb_washer'))
         ) ||
-        stateKeys.find((id) => id.includes('ifb_washer')) ||
+        stateKeys.find((id) => id.includes('ifb_washer') || id.includes('washing_machine')) ||
         '';
     }
 
@@ -838,12 +854,17 @@ export class IFBWasherCard extends LitElement {
     const problemObj = entities.problem ? this.hass.states[entities.problem] : undefined;
 
     if (!powerState && !machineStateObj && !programObj) {
+      const explicitId = this._config?.entity;
       return html`
         <ha-card class="ifb-washer-card">
           <div style="padding: 24px; text-align: center; color: var(--appliance-text-2, #8e8e93);">
             <ha-icon icon="mdi:washing-machine" style="--mdc-icon-size: 40px; margin-bottom: 8px; opacity: 0.6;"></ha-icon>
             <div style="font-weight: 500; font-size: 15px; color: var(--appliance-text-1, inherit);">IFB Washer Card</div>
-            <div style="font-size: 13px; margin-top: 4px;">No IFB Washer detected on your Home Assistant instance. Please ensure the IFB Washer integration is configured.</div>
+            <div style="font-size: 13px; margin-top: 4px;">
+              ${explicitId
+                ? html`Washing Machine entity not found: <code>${explicitId}</code>`
+                : 'No IFB Washer detected on your Home Assistant instance. Please select a washing machine entity in the card editor.'}
+            </div>
           </div>
         </ha-card>
       `;

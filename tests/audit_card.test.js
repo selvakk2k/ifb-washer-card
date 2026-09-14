@@ -143,8 +143,9 @@ check(
 
 // 14. Device-Level Auto-Discovery & Clean Device Title
 check(
-  'Auto-discovers washer device without required entity and resolves clean device title',
-  !cardFile.includes("name: 'entity',") &&
+  'Auto-discovers washer device with optional entity selector and resolves clean device title',
+  cardFile.includes("name: 'entity',") &&
+  !cardFile.includes("name: 'entity',\n          required: true") &&
   cardFile.includes('entities.deviceId') &&
   cardFile.includes('name_by_user') &&
   !stylesFile.includes('.collapse-btn.collapsed ha-icon')
