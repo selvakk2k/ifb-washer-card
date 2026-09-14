@@ -8,7 +8,6 @@ export interface IFBWasherCardConfig {
   full_layout?: 'default' | 'google_home' | string;
   accent_color?: string;
   main_color?: string;
-  water_color?: string;
   simulate?: boolean;
 
   // Optional manual entity overrides

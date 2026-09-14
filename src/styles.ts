@@ -283,7 +283,7 @@ export const styles = css`
     overflow: hidden;
   }
 
-  /* Drum water layer - dynamically matches theme accent */
+  /* Drum water layer - serene aquatic blue */
   .drum-water {
     position: absolute;
     bottom: 0;
@@ -292,11 +292,11 @@ export const styles = css`
     height: 0%;
     background: linear-gradient(
       180deg,
-      color-mix(in srgb, var(--appliance-water-color, var(--appliance-accent)) 26%, transparent) 0%,
-      color-mix(in srgb, var(--appliance-water-color, var(--appliance-accent)) 56%, transparent) 100%
+      rgba(14, 165, 233, 0.35) 0%,
+      rgba(2, 132, 199, 0.65) 100%
     );
-    border-top: 1.5px solid color-mix(in srgb, var(--appliance-water-color, var(--appliance-accent)) 70%, #ffffff);
-    box-shadow: 0 -2px 12px color-mix(in srgb, var(--appliance-water-color, var(--appliance-accent)) 35%, transparent);
+    border-top: 1.5px solid rgba(56, 189, 248, 0.85);
+    box-shadow: 0 -2px 10px rgba(14, 165, 233, 0.4);
     transition: height 1.4s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
     z-index: 2;
