@@ -1469,6 +1469,8 @@ export class IFBWasherCard extends LitElement {
           ? 'mdi:sync'
           : machineState.toLowerCase().includes('rinse')
           ? 'mdi:water-sync'
+          : (machineState.toLowerCase().includes('fill') || machineState.toLowerCase().includes('inflow') || machineState.toLowerCase().includes('pre-wash') || machineState.toLowerCase().includes('prewash') || machineState.toLowerCase().includes('soak'))
+          ? 'mdi:water-plus'
           : machineState.toLowerCase().includes('dry')
           ? 'mdi:heat-wave'
           : 'mdi:washing-machine')
@@ -1509,11 +1511,14 @@ export class IFBWasherCard extends LitElement {
 
     const stateLower = (machineState || '').toLowerCase();
     const isDrying = isRunning && (stateLower.includes('dry') || stateLower.includes('heat'));
-    const isRinsing = isRunning && stateLower.includes('rinse');
     const isSpinning = isRunning && stateLower.includes('spin');
-    const isWashing = isRunning && !isDrying && !isRinsing && !isSpinning;
+    const isFilling = isRunning && (stateLower.includes('fill') || stateLower.includes('inflow') || stateLower.includes('pre-wash') || stateLower.includes('prewash') || stateLower.includes('soak')) && !isDrying && !isSpinning;
+    const isRinsing = isRunning && stateLower.includes('rinse') && !isDrying && !isSpinning;
+    const isWashing = isRunning && !isDrying && !isRinsing && !isSpinning && !isFilling;
 
-    const waterLevelClass = isRinsing
+    const waterLevelClass = isFilling
+      ? 'fill'
+      : isRinsing
       ? 'rinse'
       : isWashing
       ? 'wash'
@@ -2086,6 +2091,8 @@ export class IFBWasherCard extends LitElement {
           ? 'mdi:sync'
           : machineState.toLowerCase().includes('rinse')
           ? 'mdi:water-sync'
+          : (machineState.toLowerCase().includes('fill') || machineState.toLowerCase().includes('inflow') || machineState.toLowerCase().includes('pre-wash') || machineState.toLowerCase().includes('prewash') || machineState.toLowerCase().includes('soak'))
+          ? 'mdi:water-plus'
           : machineState.toLowerCase().includes('dry')
           ? 'mdi:heat-wave'
           : 'mdi:washing-machine')
@@ -2121,11 +2128,14 @@ export class IFBWasherCard extends LitElement {
 
     const stateLowerClassic = (machineState || '').toLowerCase();
     const isDryingClassic = isRunning && (stateLowerClassic.includes('dry') || stateLowerClassic.includes('heat'));
-    const isRinsingClassic = isRunning && stateLowerClassic.includes('rinse');
     const isSpinningClassic = isRunning && stateLowerClassic.includes('spin');
-    const isWashingClassic = isRunning && !isDryingClassic && !isRinsingClassic && !isSpinningClassic;
+    const isFillingClassic = isRunning && (stateLowerClassic.includes('fill') || stateLowerClassic.includes('inflow') || stateLowerClassic.includes('pre-wash') || stateLowerClassic.includes('prewash') || stateLowerClassic.includes('soak')) && !isDryingClassic && !isSpinningClassic;
+    const isRinsingClassic = isRunning && stateLowerClassic.includes('rinse') && !isDryingClassic && !isSpinningClassic;
+    const isWashingClassic = isRunning && !isDryingClassic && !isRinsingClassic && !isSpinningClassic && !isFillingClassic;
 
-    const waterLevelClassClassic = isRinsingClassic
+    const waterLevelClassClassic = isFillingClassic
+      ? 'fill'
+      : isRinsingClassic
       ? 'rinse'
       : isWashingClassic
       ? 'wash'

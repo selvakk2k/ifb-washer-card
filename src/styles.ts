@@ -322,37 +322,48 @@ export const styles = css`
     height: 0%;
     background: linear-gradient(
       180deg,
-      color-mix(in srgb, var(--appliance-accent, #0ea5e9) 45%, rgba(14, 165, 233, 0.45)) 0%,
-      color-mix(in srgb, var(--appliance-accent, #0ea5e9) 70%, rgba(2, 132, 199, 0.75)) 100%
+      color-mix(in srgb, var(--appliance-accent, #0ea5e9) 35%, rgba(14, 165, 233, 0.35)) 0%,
+      color-mix(in srgb, var(--appliance-accent, #0ea5e9) 65%, rgba(2, 132, 199, 0.65)) 100%
     );
+    border-top: 1.5px solid color-mix(in srgb, var(--appliance-accent, #0ea5e9) 75%, #ffffff);
+    box-shadow: 0 -2px 10px color-mix(in srgb, var(--appliance-accent, #0ea5e9) 40%, transparent);
     transition: height 1.4s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
     z-index: 1;
+    overflow: hidden;
+  }
+  .drum-water.fill {
+    height: 20%;
   }
   .drum-water.wash {
-    height: 42%;
+    height: 28%;
   }
   .drum-water.rinse {
-    height: 58%;
+    height: 38%;
   }
   .drum-water.empty {
     height: 0%;
+    border-top-color: transparent;
+    box-shadow: none;
   }
   .drum-water::before {
     content: '';
     position: absolute;
-    top: -8px;
-    left: -50%;
-    width: 200%;
-    height: 16px;
-    background-repeat: repeat-x;
-    background-image: radial-gradient(ellipse at 50% 100%, transparent 55%, color-mix(in srgb, var(--appliance-accent, #0ea5e9) 45%, rgba(14, 165, 233, 0.45)) 58%);
-    background-size: 32px 16px;
-    animation: water-undulation 4s ease-in-out infinite alternate;
+    top: 0;
+    left: -20%;
+    width: 140%;
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.55) 50%,
+      transparent 100%
+    );
+    animation: water-surface-sheen 3.5s ease-in-out infinite alternate;
   }
-  @keyframes water-undulation {
-    from { transform: translateX(0); }
-    to { transform: translateX(16px); }
+  @keyframes water-surface-sheen {
+    from { transform: translateX(-15%); opacity: 0.3; }
+    to { transform: translateX(15%); opacity: 0.85; }
   }
 
   /* Drying cycle thermal shimmer */
@@ -386,13 +397,14 @@ export const styles = css`
 
   .porthole-content {
     position: relative;
-    z-index: 2;
+    z-index: 3;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 6px;
+    padding: 4px;
+    transform: translateY(-14px);
   }
   .porthole-hero-time {
     font-size: 1.95rem;
