@@ -1601,7 +1601,7 @@ export class IFBWasherCard extends LitElement {
         </div>
 
         <!-- Hero Dial with Flanks (Porthole + Child Lock & Phase Badges) -->
-        <div class="gh-hero-container ${!isOn ? 'disabled' : ''}">
+        <div class="porthole-container ${!isOn ? 'disabled' : ''}">
           <!-- Left Flank: Child Lock -->
           <div
             class="dial-flank child-lock-flank ${isChildLockActive ? 'active' : ''} ${!isOnline || !isOn ? 'disabled' : ''}"

@@ -1449,7 +1449,7 @@ const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:_},ce=(e=le
         </div>
 
         <!-- Hero Dial with Flanks (Porthole + Child Lock & Phase Badges) -->
-        <div class="gh-hero-container ${i?"":"disabled"}">
+        <div class="porthole-container ${i?"":"disabled"}">
           <!-- Left Flank: Child Lock -->
           <div
             class="dial-flank child-lock-flank ${m?"active":""} ${o&&i?"":"disabled"}"
