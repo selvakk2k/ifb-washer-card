@@ -1,6 +1,6 @@
 # IFB Washer Card (`ifb-washer-card`)
 
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=flat-square)](https://github.com/hacs/integration)
+[![Marketplace Custom](https://img.shields.io/badge/Marketplace-Custom-41BDF5.svg?style=flat-square)](https://www.home-assistant.io/integrations/marketplace/)
 [![Stable](https://img.shields.io/github/v/release/selvakk2k/ifb-washer-card?label=Stable&style=flat-square)](https://github.com/selvakk2k/ifb-washer-card/releases/latest)
 [![Beta](https://img.shields.io/github/v/release/selvakk2k/ifb-washer-card?include_prereleases&label=Beta&color=orange&style=flat-square)](https://github.com/selvakk2k/ifb-washer-card/releases)
 [![AI-Assisted](https://img.shields.io/badge/AI%20Assisted-Antigravity%20%7C%20Claude-blueviolet?style=flat-square&logo=google)](https://github.com/selvakk2k)
@@ -39,13 +39,27 @@ Adheres directly to the Smart Appliance Lovelace Design System, matching the sty
 
 ## Installation
 
-### Method 1: Via HACS (Recommended)
+### Method 1: Via Home Assistant Marketplace (Recommended)
+
+*Requires Home Assistant **2026.11** or newer. (On an older version? Expand the legacy HACS instructions below.)*
+
+[![Open your Home Assistant instance and open a repository in the Marketplace.](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=selvakk2k&repository=ifb-washer-card&category=plugin)
+
+1. Click the **Open Marketplace repository** button above, or go to **Settings** → **Marketplace** in Home Assistant.
+2. In the upper-right corner, select **Add from link**.
+3. Under **GitHub link**, enter `https://github.com/selvakk2k/ifb-washer-card` (connect your GitHub account if prompted), then select **Add**. *(If prompted for **Type**, select **Dashboard** and select **Add** again.)*
+4. Open **IFB Washer Card** from the list, select **Download**, and reload your dashboard.
+
+<details>
+<summary>Home Assistant 2026.10 or older (Legacy HACS)</summary>
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=selvakk2k&repository=ifb-washer-card&category=plugin)
 
 1. Click the **Open repository in HACS** button above, or open **HACS** from your Home Assistant sidebar.
 2. Click the top-right menu (⋮) → **Custom repositories** → Add `https://github.com/selvakk2k/ifb-washer-card` with category **Dashboard**.
 3. Search for **IFB Washer Card**, click **Download**, and reload your dashboard.
+
+</details>
 
 ### Method 2: Manual Installation
 
