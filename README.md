@@ -1,10 +1,12 @@
 # IFB Washer Card (`ifb-washer-card`)
 
-[![Marketplace Custom](https://img.shields.io/badge/Marketplace-Custom-41BDF5.svg?style=flat-square)](https://www.home-assistant.io/integrations/marketplace/)
-[![Stable](https://img.shields.io/github/v/release/selvakk2k/ifb-washer-card?label=Stable&style=flat-square)](https://github.com/selvakk2k/ifb-washer-card/releases/latest)
-[![Beta](https://img.shields.io/github/v/release/selvakk2k/ifb-washer-card?include_prereleases&label=Beta&color=orange&style=flat-square)](https://github.com/selvakk2k/ifb-washer-card/releases)
-[![AI-Assisted](https://img.shields.io/badge/AI%20Assisted-Antigravity%20%7C%20Claude-blueviolet?style=flat-square&logo=google)](https://github.com/selvakk2k)
-[![AI Attribution](https://img.shields.io/badge/AI%20Attribution-AIA%20PAI%20Nc%20Hin-orange?style=flat-square)](https://aiattribution.github.io/interpret-attribution)
+<p align="center">
+  <a href="https://www.home-assistant.io/integrations/marketplace/"><img src="https://img.shields.io/badge/Marketplace-Custom-41BDF5.svg?style=flat-square" alt="Marketplace Custom"></a>
+  <a href="https://github.com/selvakk2k/ifb-washer-card/releases/latest"><img src="https://img.shields.io/github/v/release/selvakk2k/ifb-washer-card?label=Stable&style=flat-square" alt="Stable"></a>
+  <a href="https://github.com/selvakk2k/ifb-washer-card/releases"><img src="https://img.shields.io/github/v/release/selvakk2k/ifb-washer-card?include_prereleases&label=Beta&color=orange&style=flat-square" alt="Beta"></a>
+  <a href="https://github.com/selvakk2k"><img src="https://img.shields.io/badge/AI%20Assisted-Antigravity%20%7C%20Claude%20%7C%20CodeRabbit-blueviolet?style=flat-square" alt="AI-Assisted"></a>
+  <a href="https://aiattribution.github.io/interpret-attribution"><img src="https://img.shields.io/badge/AI%20Attribution-AIA%20PAI%20Nc%20Hin-orange?style=flat-square" alt="AI Attribution"></a>
+</p>
 
 A custom Lovelace card for IFB front-load washing machines and washer dryers connected locally via the `ifb_washer_local` Home Assistant integration.
 
